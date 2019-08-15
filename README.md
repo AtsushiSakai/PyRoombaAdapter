@@ -32,4 +32,4 @@ MIT
 
 # Authors
 
-- [Atsushi Sakai](https://github.com/AtsushiSakai/) ([@Atsushi_twi](https://twitter.com/Atsushi_twi))
+- [Atsushi Sakai](https://github.com/AtsushiSakai/)

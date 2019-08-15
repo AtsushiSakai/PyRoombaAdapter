@@ -6,14 +6,31 @@ A Python library for Roomba Open Interface
 What is this?
 =============
 
+This is a python library for Roomba Open Interface(ROI)
+
+It aims to control Roombas easily.
+
+Install
+=======
+
+You can use pip to install it.
+
+$ pip install PyRoombaAdapter
+
 Requirements
 ============
+
+-  Python 3.6.x or higher (2.7 is not supported)
+
+-  `pyserial <https://pythonhosted.org/pyserial/>`__
 
 Documentation
 =============
 
-How to use
-==========
+Please check the document for all API and usages.
+
+-  `Welcome to PyRoombaAdapter’s
+   documentation! <https://atsushisakai.github.io/PyRoombaAdapter/>`__
 
 License
 =======
@@ -24,4 +41,3 @@ Authors
 =======
 
 -  `Atsushi Sakai <https://github.com/AtsushiSakai/>`__
-   ([@Atsushi_twi](https://twitter.com/Atsushi_twi))

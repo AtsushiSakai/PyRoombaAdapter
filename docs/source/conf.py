@@ -16,7 +16,17 @@ import os
 import sys
 module_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+'../../../pyrooombaadapter/')
 print(module_path)
-sys.path.insert(0, module_path) 
+sys.path.insert(0, module_path)
+
+
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__del__":
+        return False
+    return would_skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
 
 
 # -- Project information -----------------------------------------------------

@@ -10,7 +10,20 @@ import serial
 
 class PyRoombaAdapter:
     """
-    Adapter class for Rommba Open Interface
+    Adapter class for Roomba Open Interface
+
+    The constructor connects serial port and change the mode to safe mode
+
+    Args:
+        - port: Serial port string
+        - bau_rate (default=115200): bau rate of serial connection
+        - time_out_sec (default=1.0) : read time out of serial connection [sec]
+        - wheel_span_mm (default=235.0): wheel span of Roomba [mm]
+
+    Examples:
+        >>> PORT = "/dev/ttyUSB0"
+        >>> adapter = PyRoombaAdapter(PORT)
+
     """
     CMD = {"Start": 128,
            "Baud": 129,
@@ -21,6 +34,7 @@ class PyRoombaAdapter:
            "Max": 136,
            "Drive": 137,
            "Sensors": 142,
+           "Seek Dock": 143,
            "Query List": 149,
            "Stream": 149,
            }
@@ -37,46 +51,81 @@ class PyRoombaAdapter:
         "MAX_VELOCITY": 500,
     }
 
-    def __init__(self, port, bau_rate=115200, time_out=1.0):
-        self.serial_con = self._connect_serial(port, bau_rate, time_out)
-
-        self.WHEEL_SPAN = 235.0
-
+    def __init__(self, port, bau_rate=115200, time_out_sec=1., wheel_span_mm=235.0):
+        self.WHEEL_SPAN = wheel_span_mm
+        self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
         self.change_mode_to_safe()  # default mode is safe mode
 
     def __del__(self):
-        # disconnect sequence
-        self._send_cmd(self.CMD["Start"]) # move to passive mode
-        sleep(0.1)
+        """
+        Destructor of PyRoombaAdapter class
 
+        The Destructor make Roomba move to passive mode and close serial connection
+        """
+        # disconnect sequence
+        self._send_cmd(self.CMD["Start"])  # move to passive mode
+        sleep(0.1)
         self.serial_con.close()
 
     def start_cleaning(self):
         """
-        Start cleaning
+        Start the default cleaning
 
-        :return:
+        - Available in modes: Passive, Safe, or Full
+        - Changes mode to: Passive
+
+        Examples:
+            >>> PORT = "/dev/ttyUSB0"
+            >>> adapter = PyRoombaAdapter(PORT)
+            >>> adapter.start_cleaning()
         """
         self._send_cmd(self.CMD["Start"])
         self._send_cmd(self.CMD["Clean"])
 
     def start_max_cleaning(self):
         """
-        Start Max cleaning
+        Start the max cleaning
 
-        :return:
+        - Available in modes: Passive, Safe, or Full
+        - Changes mode to: Passive
+
+        Examples:
+            >>> PORT = "/dev/ttyUSB0"
+            >>> adapter = PyRoombaAdapter(PORT)
+            >>> adapter.start_max_cleaning()
         """
         self._send_cmd(self.CMD["Start"])
         self._send_cmd(self.CMD["Max"])
 
     def start_spot_cleaning(self):
         """
-        Start Max cleaning
+        Start spot cleaning
 
-        :return:
+        - Available in modes: Passive, Safe, or Full
+        - Changes mode to: Passive
+
+        Examples:
+            >>> PORT = "/dev/ttyUSB0"
+            >>> adapter = PyRoombaAdapter(PORT)
+            >>> adapter.start_spot_cleaning()
         """
         self._send_cmd(self.CMD["Start"])
         self._send_cmd(self.CMD["Spot"])
+
+    def start_seek_dock(self):
+        """
+        Start seek dock
+
+        - Available in modes: Passive, Safe, or Full
+        - Changes mode to: Passive
+
+        Examples:
+            >>> PORT = "/dev/ttyUSB0"
+            >>> adapter = PyRoombaAdapter(PORT)
+            >>> adapter.start_seek_dock()
+        """
+        self._send_cmd(self.CMD["Start"])
+        self._send_cmd(self.CMD["Seek Dock"])
 
     def change_mode_to_safe(self):
         # send command
@@ -99,28 +148,36 @@ class PyRoombaAdapter:
             # print("re:", self.serial_con.read())
             # sleep(0.5)
 
-    def move(self, cm_per_sec=0, deg_per_sec=0):
+    def move(self, velocity, yaw_rate):
         """
-        cm_per_sec centimeters per second
-        deg_per_sec degrees per second
-        go() is equivalent to go(0,0)
+        control roomba at the velocity and the rotational speed (yaw rate)
+
+        Note:
+            The Roomba keep a control command until receiving next command
+
+        Args:
+            - velocity: velocity (m/sec)
+            - yaw_rate: yaw raete (rad/sec)
+
+        Examples:
+            >>> PORT = "/dev/ttyUSB0"
+            >>> adapter = PyRoombaAdapter(PORT)
+            >>> adapter.move(0, -10) # rotate to right side
         """
-        if deg_per_sec >= 0:
+        if yaw_rate >= 0:
             direction = 'CCW'
         else:
             direction = 'CW'
 
-        if cm_per_sec == 0:  # rotation
-            rad_per_sec = math.radians(deg_per_sec)
-            vel_mm_sec = math.fabs(rad_per_sec) * (self.WHEEL_SPAN / 2.0)
+        if velocity == 0:  # rotation
+            vel_mm_sec = math.fabs(yaw_rate) * (self.WHEEL_SPAN / 2.0)
             radius_mm = 0
-        elif deg_per_sec == 0:
-            vel_mm_sec = 10.0 * cm_per_sec
+        elif yaw_rate == 0:
+            vel_mm_sec = velocity / 1000.0  # m/s -> mm/s
             radius_mm = self.PARAMS["STRAIGHT_RADIUS"]
         else:
-            vel_mm_sec = 10.0 * cm_per_sec
-            rad_per_sec = math.radians(deg_per_sec)
-            radius_mm = vel_mm_sec / rad_per_sec
+            vel_mm_sec = velocity / 1000.0  # m/s -> mm/s
+            radius_mm = vel_mm_sec / yaw_rate
 
         self._send_drive_cmd(vel_mm_sec, radius_mm, direction)
 
