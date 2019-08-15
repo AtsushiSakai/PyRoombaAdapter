@@ -1,3 +1,5 @@
+<img src="https://github.com/AtsushiSakai/PyRoombaAdapter/raw/master/docs/icon.png?raw=true" align="right" width="300"/>
+
 # PyRoombaAdapter
 
 A Python library for Roomba Open Interface
