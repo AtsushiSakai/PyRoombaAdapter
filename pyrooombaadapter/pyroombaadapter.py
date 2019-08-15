@@ -1,6 +1,5 @@
 """
 A Python module for Roomba Open Interface
-
 """
 import math
 from time import sleep
@@ -10,10 +9,16 @@ import serial
 
 
 class PyRoombaAdapter:
+    """
+    Adapter class for Rommba Open Interface
+    """
     CMD = {"Start": 128,
            "Baud": 129,
            "Safe": 131,
            "Full": 132,
+           "Spot": 134,
+           "Clean": 135,
+           "Max": 136,
            "Drive": 137,
            "Sensors": 142,
            "Query List": 149,
@@ -37,28 +42,49 @@ class PyRoombaAdapter:
 
         self.WHEEL_SPAN = 235.0
 
-        self.change_mode_to_passive()
+        self.change_mode_to_safe()  # default mode is safe mode
 
     def __del__(self):
         # disconnect sequence
-        self._send_cmd(self.CMD["Start"])
+        self._send_cmd(self.CMD["Start"]) # move to passive mode
         sleep(0.1)
 
         self.serial_con.close()
 
-    def change_mode_to_passive(self):
-        # send command
-        self._send_cmd(self.CMD["Start"])
+    def start_cleaning(self):
+        """
+        Start cleaning
 
+        :return:
+        """
+        self._send_cmd(self.CMD["Start"])
+        self._send_cmd(self.CMD["Clean"])
+
+    def start_max_cleaning(self):
+        """
+        Start Max cleaning
+
+        :return:
+        """
+        self._send_cmd(self.CMD["Start"])
+        self._send_cmd(self.CMD["Max"])
+
+    def start_spot_cleaning(self):
+        """
+        Start Max cleaning
+
+        :return:
+        """
+        self._send_cmd(self.CMD["Start"])
+        self._send_cmd(self.CMD["Spot"])
+
+    def change_mode_to_safe(self):
+        # send command
         self._send_cmd(self.CMD["Start"])
         self._send_cmd(self.CMD["Safe"])
 
-        sleep(0.5)
-
         # check mode
         # self.request_data([self.Packet_ID["OI Mode"]])
-
-        sleep(0.5)
 
         # self._send_cmd(self.CMD["Start"])
         # self._send_cmd(self.CMD["Start"])
@@ -70,7 +96,7 @@ class PyRoombaAdapter:
             self._send_cmd(self.CMD["Start"])
             self._send_cmd(self.CMD["Sensors"])
             self._send_cmd(request_id_list[0])
-            print("re:", self.serial_con.read())
+            # print("re:", self.serial_con.read())
             # sleep(0.5)
 
     def move(self, cm_per_sec=0, deg_per_sec=0):
@@ -162,9 +188,17 @@ class PyRoombaAdapter:
 def main():
     PORT = "/dev/ttyUSB0"
     adapter = PyRoombaAdapter(PORT)
+    adapter.start_max_cleaning()
+    sleep(1.0)
+    adapter.change_mode_to_safe()
+    sleep(1.0)
     adapter.move(0, -10)
     sleep(1.0)
     adapter.move(0, 10)
+    sleep(1.0)
+    adapter.move(10, 0)
+    sleep(1.0)
+    adapter.move(-10, 0)
     sleep(1.0)
 
 
