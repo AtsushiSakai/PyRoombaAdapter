@@ -18,7 +18,7 @@ $ pip install PyRoombaAdapter
 
 - Python 3.6.x or higher (2.7 is not supported)
 
-- pyserial
+- [pyserial](https://pythonhosted.org/pyserial/)
 
 # Documentation
 
