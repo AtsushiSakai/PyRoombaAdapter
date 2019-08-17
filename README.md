@@ -12,13 +12,15 @@ This module is based on the document:
 
 - [iRobot® Roomba 500 Open Interface (OI) Specification](https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf)
 
-It aims to control Roomba easily.
+It aims to control a Roomba easily.
+
+This module is only tested on Roomba 690 model. 
 
 # Install
 
 You can use pip to install it.
 
-> $ pip install PyRoombaAdapter
+    $ pip install PyRoombaAdapter
 
 # Requirements
 
@@ -31,6 +33,14 @@ You can use pip to install it.
 Please check the document for all API and usages.
 
 - [Welcome to PyRoombaAdapter’s documentation\!](https://atsushisakai.github.io/PyRoombaAdapter/)
+
+# Simple usage
+
+# Contribution
+
+Any contributions to this project are welcome!
+
+Feel free to make an issue and a PR to improve this OSS.
 
 # License
 

@@ -6,10 +6,8 @@ This module is based on the document: iRobot® Roomba 500 Open Interface (OI) Sp
 
 """
 import math
-from enum import Enum
 from time import sleep
 
-import byte_tool
 import serial  # pyserial
 
 
@@ -42,6 +40,8 @@ class PyRoombaAdapter:
            "Max": 136,
            "Drive": 137,
            "Moters": 138,
+           "Song": 140,
+           "Play": 141,
            "Sensors": 142,
            "Seek Dock": 143,
            "PWM Moters": 144,
@@ -49,6 +49,7 @@ class PyRoombaAdapter:
            "Drive PWM": 146,
            "Query List": 149,
            "Stream": 148,
+           "Buttons": 165,
            }
 
     Packet_ID = {
@@ -62,10 +63,6 @@ class PyRoombaAdapter:
         "MIN_VELOCITY": -500,
         "MAX_VELOCITY": 500,
     }
-
-    class Direction(Enum):
-        clockwise = 1
-        counter_clockwise = 2
 
     def __init__(self, port, bau_rate=115200, time_out_sec=1., wheel_span_mm=235.0):
         self.WHEEL_SPAN = wheel_span_mm
@@ -287,10 +284,10 @@ class PyRoombaAdapter:
         # print(roomba_mm_sec, roomba_radius_mm, turn_dir)
 
         roomba_mm_sec = self._adjust_min_max(roomba_mm_sec, self.PARAMS["MIN_VELOCITY"], self.PARAMS["MAX_VELOCITY"])
-        velHighVal, velLowVal = byte_tool.get_2_bytes(roomba_mm_sec)
+        velHighVal, velLowVal = self._get_2_bytes(roomba_mm_sec)
 
         roomba_radius_mm = self._adjust_min_max(roomba_radius_mm, self.PARAMS["MIN_RADIUS"], self.PARAMS["MAX_RADIUS"])
-        radiusHighVal, radiusLowVal = byte_tool.get_2_bytes(roomba_radius_mm)
+        radiusHighVal, radiusLowVal = self._get_2_bytes(roomba_radius_mm)
 
         # send these bytes and set the stored velocities
         self._send_cmd([self.CMD["Drive"], velHighVal, velLowVal, radiusHighVal, radiusLowVal])
@@ -395,6 +392,159 @@ class PyRoombaAdapter:
 
         self._send_cmd([self.CMD["Moters"], cmd])
 
+    def send_pwm_moters(self, main_brush_pwm, side_brush_pwm, vacuum_pwm):
+        """
+        send pwm moters
+
+        This command control the speed of Roomba’s main brush, side brush, and vacuum independently.
+        With each data byte, you specify the duty cycle for the low side driver (max 128).
+        For example, if you want to control a motor with 25% of battery voltage, choose a duty cycle of 128 * 25% = 32.
+        The main brush and side brush can be run in either direction.
+        The vacuum only runs forward. Positive speeds turn the motor in its default (cleaning) direction.
+        Default direction for the side brush is counterclockwise.
+        Default direction for the main brush/flapper is inward.
+
+        - Available in modes: Safe or Full
+
+        :param int main_brush_pwm: main brush PWM (-127 - 127)
+
+        :param int side_brush_pwm: side brush PWM (-127 - 127)
+
+        :param int vacuum_pwm: vacuum duty cycle (0 - 127)
+
+        Examples:
+            >>> adapter = PyRoombaAdapter("/dev/ttyUSB0")
+            >>> adapter.send_pwm_moters(-55, 0, 0) # main brush is 55% PWM to opposite direction
+            >>> sleep(2.0) # keep 2 sec
+        """
+        main_brush_pwm = self._get_1_bytes(self._adjust_min_max(main_brush_pwm, -127, 127))
+        side_brush_pwm = self._get_1_bytes(self._adjust_min_max(side_brush_pwm, -127, 127))
+        vacuum_pwm = self._adjust_min_max(vacuum_pwm, 0, 127)
+        self._send_cmd([self.CMD["PWM Moters"], main_brush_pwm, side_brush_pwm, vacuum_pwm])
+
+    def send_buttons_cmd(self, clean=False, spot=False, dock=False,
+                         minute=False, hour=False, day=False, schedule=False, clock=False):
+        """
+        send buttons command
+
+        This command lets you push Roomba’s buttons. The buttons will automatically release after 1/6th of a second.
+
+        Note:
+            - This API doesn't work on Roomba 690 Model
+
+        :param bool clean: clean button on
+        :param bool spot: spot button on
+        :param bool dock: dock button on
+        :param bool minute: minute button on
+        :param bool hour: hour button on
+        :param bool day: day button on
+        :param bool schedule: schedule button on
+        :param bool clock: clock button on
+        """
+        buttons = 0  # All initial bit is 0
+        if clean:
+            buttons |= 0b00000001
+        if spot:
+            buttons |= 0b00000010
+        if dock:
+            buttons |= 0b00000100
+        if minute:
+            buttons |= 0b00001000
+        if hour:
+            buttons |= 0b00010000
+        if day:
+            buttons |= 0b00100000
+        if schedule:
+            buttons |= 0b01000000
+        if clock:
+            buttons |= 0b10000000
+
+        self._send_cmd([self.CMD["Buttons"], buttons])
+
+    def send_song_cmd(self, song_number, song_length, note_number_list, note_duration_list):
+        """
+        Send song command
+
+        This command lets you specify up to four songs to the OI that you can play at a later time.
+        Each song is associated with a song number.
+        The Play command uses the song number to identify your song selection.
+        Each song can contain up to sixteen notes.
+        Each note is associated with a note number that uses MIDI note definitions and a duration
+        that is specified in fractions of a second.
+        The number of data bytes varies, depending on the length of the song specified.
+        A one note song is specified by four data bytes.
+        For each additional note within a song, add two data bytes.
+
+        - Available in modes: Passive, Safe, or Full
+
+        :param int song_number: (0-4) The song number associated with the specific song.
+                        If you send a second Song command, using the same song number, the old song is overwritten.
+
+        :param int song_length: (1-16) The length of the song, according to the number of musical notes within the song.
+
+        :param list note_number_list: Note Number (31 – 127) The pitch of the musical note Roomba will play,
+                                      according to the MIDI note numbering scheme.
+                                      The lowest musical note that Roomba will play is Note #31.
+                                      Roomba considers all musical notes outside the range of 31 – 127 as rest notes,
+                                      and will make no sound during the duration of those notes.
+
+        :param list note_duration_list: Note Duration (0 – 255) The duration of a musical note,
+                                        in increments of 1/64th of a second. Example: a half-second long
+                                        musical note has a duration value of 32.
+
+        Examples:
+            >>> adapter = PyRoombaAdapter("/dev/ttyUSB0")
+            >>> # note names
+            >>> f4 = 65
+            >>> a4 = 69
+            >>> c5 = 72
+            >>> # note lengths
+            >>> MEASURE = 160
+            >>> HALF = int(MEASURE / 2)
+            >>> Q = int(MEASURE / 4)
+            >>> Ed = int(MEASURE * 3 / 16)
+            >>> S = int(MEASURE / 16)
+            >>> adapter.send_song_cmd(0, 9,
+            >>>             [a4, a4, a4, f4, c5, a4, f4, c5, a4],
+            >>>             [Q, Q, Q, Ed, S, Q, Ed, S, HALF]) # set song
+            >>> adapter.send_play_cmd(0) # play song
+            >>> sleep(10.0) # keep playing
+        """
+        cmd = [self.CMD["Song"], song_number, song_length]
+        for (note_number, note_duration) in zip(note_number_list, note_duration_list):
+            cmd.append(note_number)
+            cmd.append(note_duration)
+        self._send_cmd(cmd)
+
+    def send_play_cmd(self, song_number):
+        """
+        send play command
+
+        This command lets you select a song to play from the songs added to Roomba using the Song command.
+        You must add one or more songs to Roomba using the Song command in order for the Play command to work.
+
+        :param int song_number: (0-4)
+
+        Examples:
+            >>> adapter = PyRoombaAdapter("/dev/ttyUSB0")
+            >>> # note names
+            >>> f4 = 65
+            >>> a4 = 69
+            >>> c5 = 72
+            >>> # note lengths
+            >>> MEASURE = 160
+            >>> HALF = int(MEASURE / 2)
+            >>> Q = int(MEASURE / 4)
+            >>> Ed = int(MEASURE * 3 / 16)
+            >>> S = int(MEASURE / 16)
+            >>> adapter.send_song_cmd(0, 9,
+            >>>             [a4, a4, a4, f4, c5, a4, f4, c5, a4],
+            >>>             [Q, Q, Q, Ed, S, Q, Ed, S, HALF]) # set song
+            >>> adapter.send_play_cmd(0) # play song
+            >>> sleep(10.0) # keep playing
+        """
+        self._send_cmd([self.CMD["Play"], song_number])
+
     @staticmethod
     def _connect_serial(port, bau_rate, time_out):
         serial_con = serial.Serial(port, baudrate=bau_rate, timeout=time_out)
@@ -418,6 +568,33 @@ class PyRoombaAdapter:
 
         return val
 
+    @staticmethod
+    def _get_2_bytes(value):
+        """ returns two bytes (ints) in high, low order
+        whose bits form the input value when interpreted in
+        two's complement
+        """
+        # if positive or zero, it's OK
+        if value >= 0:
+            eqBitVal = value
+        # if it's negative, I think it is this
+        else:
+            eqBitVal = (1 << 16) + value
+
+        return (eqBitVal >> 8) & 0xFF, eqBitVal & 0xFF
+
+    @staticmethod
+    def _get_1_bytes(value):
+        """ returns one bytes (int)
+        """
+        # if positive or zero, it's OK
+        if value >= 0:
+            eqBitVal = value
+        # if it's negative, I think it is this
+        else:
+            eqBitVal = (1 << 8) + value
+        return eqBitVal & 0xFF
+
     def _send_cmd(self, cmd):
         if type(cmd) == list:  # command list
             self.serial_con.write(bytes(cmd))
@@ -430,21 +607,44 @@ def main():
     adapter = PyRoombaAdapter(PORT)
     # adapter.send_drive_cmd(-100, -1000)
     # adapter.send_drive_direct(-100, 100)
-    # import numpy as np
+    import numpy as np
     # adapter.move(0.1, np.deg2rad(-10))
     # adapter.send_drive_pwm(80, 80)
     # adapter.send_drive_pwm(-200, -200)
-    adapter.send_moters_cmd(False, True, True, True, False)
-    sleep(1.0)
+    # adapter.send_moters_cmd(False, True, True, True, False)
+    # adapter.send_pwm_moters(-55, -25, 25)
+    # adapter.send_buttons_cmd(dock=True)
+    # sleep(1.0)
 
-    # adapter.move(0, np.deg2rad(-10))
-    # sleep(1.0)
-    # adapter.move(0, np.deg2rad(10))
-    # sleep(1.0)
-    # adapter.move(0.1, np.deg2rad(0.0))
-    # sleep(1.0)
+    adapter.move(0.2, np.deg2rad(0.0))
+    sleep(1.0)
+    adapter.move(0, np.deg2rad(-20))
+    sleep(6.0)
+    adapter.move(0.2, np.deg2rad(0.0))
+    sleep(1.0)
+    adapter.move(0, np.deg2rad(20))
+    sleep(6.0)
+
     # adapter.move(-0.1, 0)
     # sleep(1.0)
+
+    # Song test
+    # note names
+    # f4 = 65
+    # a4 = 69
+    # c5 = 72
+    # # note lengths
+    # MEASURE = 160
+    # HALF = int(MEASURE / 2)
+    # Q = int(MEASURE / 4)
+    # Ed = int(MEASURE * 3 / 16)
+    # S = int(MEASURE / 16)
+    #
+    # adapter.send_song_cmd(0, 9,
+    #                       [a4, a4, a4, f4, c5, a4, f4, c5, a4],
+    #                       [Q, Q, Q, Ed, S, Q, Ed, S, HALF])
+    # adapter.send_play_cmd(0)
+    # sleep(10.0)
 
 
 if __name__ == '__main__':
