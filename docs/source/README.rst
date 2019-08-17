@@ -8,14 +8,19 @@ What is this?
 
 This is a python library for Roomba Open Interface(ROI)
 
-It aims to control Roombas easily.
+This module is based on the document:
+
+-  `iRobot® Roomba 500 Open Interface (OI)
+   Specification <https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf>`__
+
+It aims to control Roomba easily.
 
 Install
 =======
 
 You can use pip to install it.
 
-$ pip install PyRoombaAdapter
+   $ pip install PyRoombaAdapter
 
 Requirements
 ============

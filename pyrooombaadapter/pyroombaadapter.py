@@ -1,5 +1,9 @@
 """
-A Python module for Roomba Open Interface
+A Python adapter module for Roomba Open Interface
+
+This module is based on the document: iRobot® Roomba 500 Open Interface (OI) Specification
+- Link https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf
+
 """
 import math
 from enum import Enum
@@ -15,11 +19,13 @@ class PyRoombaAdapter:
 
     The constructor connects serial port and change the mode to safe mode
 
-    Args:
-        - port: Serial port string
-        - bau_rate (default=115200): bau rate of serial connection
-        - time_out_sec (default=1.0) : read time out of serial connection [sec]
-        - wheel_span_mm (default=235.0): wheel span of Roomba [mm]
+    :param string port: Serial port path
+
+    :param int bau_rate: bau rate of serial connection (default=115200)
+
+    :param float time_out_sec: read time out of serial connection [sec] (default=1.0)
+
+    :param float wheel_span_mm: wheel span of Roomba [mm]  (default=235.0)
 
     Examples:
         >>> PORT = "/dev/ttyUSB0"
@@ -229,9 +235,9 @@ class PyRoombaAdapter:
             - Turn in place clockwise = -1
             - Turn in place counter-clockwise = 1
 
-        Args:
-            - velocity: velocity (m/sec)
-            - yaw_rate: yaw rate (rad/sec)
+        :param float velocity: velocity (m/sec)
+
+        :param float yaw_rate: yaw rate (rad/sec)
 
         Examples:
             >>> import numpy as np
@@ -268,12 +274,10 @@ class PyRoombaAdapter:
         Special cases for the radius make Roomba turn in place or drive straight.
         A negative velocity makes Roomba drive backward.
 
-        Args:
-            - roomba_mm_sec: the average velocity of the drive wheels in millimeters per second (mm/s)
-              (-500 – 500 mm/s)
-            - roomba_radius_mm: the radius in millimeters at which Roomba will turn.
-              (-2000 – 2000 mm)
-            - turn_dir: turning direction, it should be CW:clock wise or CCW: counter clock wise
+        :param float roomba_mm_sec: the average velocity of the drive wheels in millimeters per second (-500 – 500 mm/s)
+
+        :param float roomba_radius_mm: the radius in millimeters at which Roomba will turn. (-2000 – 2000 mm)
+
         Examples:
             >>> PORT = "/dev/ttyUSB0"
             >>> adapter = PyRoombaAdapter(PORT)
@@ -300,15 +304,14 @@ class PyRoombaAdapter:
 
         - Available in modes: Safe or Full
 
-        Args:
-            - right_mm_sec: the average velocity of the right drive wheels in millimeters per second (mm/s)
-              (-500 – 500 mm/s)
-            - left_mm_sec: the average velocity of the left drive wheels in millimeters per second (mm/s)
-              (-500 – 500 mm/s)
+        :param float right_mm_sec: the velocity of the right drive wheels in millimeters per second (-500 – 500 mm/s)
+
+        :param float left_mm_sec: the velocity of the left drive wheels in millimeters per second (-500 – 500 mm/s)
+
         Examples:
             >>> PORT = "/dev/ttyUSB0"
             >>> adapter = PyRoombaAdapter(PORT)
-            >>>> adapter.send_drive_direct(10, 100) # move right forward
+            >>> adapter.send_drive_direct(10, 100) # move right forward
             >>> sleep(2.0) # keep 2 sec
         """
         right_mm_sec = self._adjust_min_max(right_mm_sec, self.PARAMS["MIN_VELOCITY"], self.PARAMS["MAX_VELOCITY"])
@@ -330,9 +333,9 @@ class PyRoombaAdapter:
 
         - Available in modes: Safe or Full
 
-        Args:
-            - right_pwm: Right wheel PWM (-255 – 255)
-            - left_pwm: Left wheel PWM (-255 - 255)
+        :param int right_pwm: Right wheel PWM (-255 – 255)
+
+        :param int left_pwm: Left wheel PWM (-255 - 255)
 
         Examples:
             >>> PORT = "/dev/ttyUSB0"
@@ -390,8 +393,6 @@ class PyRoombaAdapter:
         if not main_brush_direction_is_ccw:
             cmd |= 0b00010000
 
-        print(cmd)
-        print(bin(cmd))
         self._send_cmd([self.CMD["Moters"], cmd])
 
     @staticmethod

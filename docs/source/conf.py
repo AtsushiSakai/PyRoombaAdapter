@@ -18,7 +18,6 @@ module_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+'../../
 print(module_path)
 sys.path.insert(0, module_path)
 
-
 def skip(app, what, name, obj, would_skip, options):
     if name == "__del__":
         return False
@@ -112,6 +111,16 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
+html_theme_options = {
+    "github_banner" : True,
+    "github_button": True,
+    "github_repo": "PyRoombaAdapter",
+    "github_user": "AtsushiSakai",
+    "donate_url" : "https://www.patreon.com/myenigma",
+}
+
+
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
