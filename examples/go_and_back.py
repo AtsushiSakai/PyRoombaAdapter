@@ -1,3 +1,8 @@
+"""
+    Go and  back example with roomba
+"""
+from time import sleep
+
 import numpy as np
 from pyroombaadapter import PyRoombaAdapter
 
