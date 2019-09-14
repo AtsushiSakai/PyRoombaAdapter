@@ -214,8 +214,9 @@ class PyRoombaAdapter:
             self._send_cmd(self.CMD["Start"])
             self._send_cmd(self.CMD["Sensors"])
             self._send_cmd(request_id_list[0])
-            # print("re:", self.serial_con.read())
-            # sleep(0.5)
+            sleep(0.5)
+            print("re:", self.serial_con.read())
+            sleep(0.5)
 
     def move(self, velocity, yaw_rate):
         """
@@ -627,24 +628,6 @@ def main():
 
     # adapter.move(-0.1, 0)
     # sleep(1.0)
-
-    # Song test
-    # note names
-    # f4 = 65
-    # a4 = 69
-    # c5 = 72
-    # # note lengths
-    # MEASURE = 160
-    # HALF = int(MEASURE / 2)
-    # Q = int(MEASURE / 4)
-    # Ed = int(MEASURE * 3 / 16)
-    # S = int(MEASURE / 16)
-    #
-    # adapter.send_song_cmd(0, 9,
-    #                       [a4, a4, a4, f4, c5, a4, f4, c5, a4],
-    #                       [Q, Q, Q, Ed, S, Q, Ed, S, HALF])
-    # adapter.send_play_cmd(0)
-    # sleep(10.0)
 
 
 if __name__ == '__main__':
