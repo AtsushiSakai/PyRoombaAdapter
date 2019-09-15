@@ -14,7 +14,7 @@
 #
 import os
 import sys
-module_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+'../../../pyrooombaadapter/')
+module_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+'../../../pyroombaadapter/')
 print(module_path)
 sys.path.insert(0, module_path)
 

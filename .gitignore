@@ -1,4 +1,6 @@
 build/html/
+.DS_Store
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

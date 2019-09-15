@@ -18,11 +18,11 @@ This module is only tested on Roomba 690 model.
 
 # Install
 
-You can use setup.py to install it.
+You can use pip to install it.
 
-    $ git clone https://github.com/AtsushiSakai/PyRoombaAdapter.git
+    $ pip install pyroombaadapter
 
-    $ sudo python PyRoombaAdapter/setup.py install
+- [pyroombaadapter · PyPI](https://pypi.org/project/pyroombaadapter/)
 
 # Requirements
 
@@ -43,6 +43,8 @@ All examples are in examples directory.
 Click each image to see each example movie.
 
 ## Go and back example
+
+[![](https://img.youtube.com/vi/rGppIKN-roE/0.jpg)](https://www.youtube.com/watch?v=rGppIKN-roE)
 
 This example uses "move" API.
 

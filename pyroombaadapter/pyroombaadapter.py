@@ -6,6 +6,7 @@ This module is based on the document: iRobot® Roomba 500 Open Interface (OI) Sp
 
 """
 import math
+import sys
 from time import sleep
 
 import serial  # pyserial
@@ -66,7 +67,11 @@ class PyRoombaAdapter:
 
     def __init__(self, port, bau_rate=115200, time_out_sec=1., wheel_span_mm=235.0):
         self.WHEEL_SPAN = wheel_span_mm
-        self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
+        try:
+            self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
+        except SerialException: 
+            print("Cannot find serial port. Plase reconnect it.")
+            sys.exit(1)
 
         self.change_mode_to_safe()  # default mode is safe mode
         sleep(1.0)

@@ -21,7 +21,7 @@ except(IOError, ImportError):
 
 setup(
     name="pyroombaadapter",
-    version="0.1.0",
+    version="0.1.1",
     url="https://github.com/AtsushiSakai/PyRoombaAdapter",
     author="Atsushi Sakai",
     author_email="asakaig@gmail.com",
