@@ -6,17 +6,18 @@ How to upload new release
 3. create zip file: python setup.py sdist
 4. upload twine upload --repository pypi dist/hogehoeg
 """
+import os
+
 from setuptools import setup, find_packages
+
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # read README
 try:
     import pypandoc
-    import os
-
-    PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
     readme = pypandoc.convert_file(PROJECT_PATH + '/README.md', 'rst')
 except(IOError, ImportError):
-    readme = open('README.md').read()
+    readme = open(PROJECT_PATH + '/README.md').read()
 
 setup(
     name="pyroombaadapter",
