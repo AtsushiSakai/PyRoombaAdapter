@@ -20,13 +20,14 @@ This module is only tested on Roomba 690 model.
 Install
 =======
 
-You can use setup.py to install it.
+You can use pip to install it.
 
 ::
 
-   $ git clone https://github.com/AtsushiSakai/PyRoombaAdapter.git
+   $ pip install pyroombaadapter
 
-   $ sudo python PyRoombaAdapter/setup.py install
+-  `pyroombaadapter ·
+   PyPI <https://pypi.org/project/pyroombaadapter/>`__
 
 Requirements
 ============
@@ -52,6 +53,8 @@ Click each image to see each example movie.
 
 Go and back example
 -------------------
+
+|image0|
 
 This example uses “move” API.
 
@@ -81,7 +84,7 @@ This example uses “move” API.
 Play song1
 ----------
 
-|image0|
+|image1|
 
 This example uses “send_song_cmd” and “send_play_cmd” API.
 
@@ -112,7 +115,7 @@ This example uses “send_song_cmd” and “send_play_cmd” API.
 Play song2
 ----------
 
-|image1|
+|image2|
 
 This example uses “send_song_cmd” and “send_play_cmd” API.
 
@@ -183,7 +186,9 @@ Authors
 
 -  `Atsushi Sakai <https://github.com/AtsushiSakai/>`__
 
-.. |image0| image:: https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg
+.. |image0| image:: https://img.youtube.com/vi/rGppIKN-roE/0.jpg
+   :target: https://www.youtube.com/watch?v=rGppIKN-roE
+.. |image1| image:: https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg
    :target: https://www.youtube.com/watch?v=0XqpQq7PQ8I
-.. |image1| image:: https://img.youtube.com/vi/nYstniMkJo0/0.jpg
+.. |image2| image:: https://img.youtube.com/vi/nYstniMkJo0/0.jpg
    :target: https://www.youtube.com/watch?v=nYstniMkJo0
