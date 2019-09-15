@@ -11,14 +11,16 @@ from setuptools import setup, find_packages
 # read README
 try:
     import pypandoc
+    import os
 
-    readme = pypandoc.convert_file('README.md', 'rst')
+    PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
+    readme = pypandoc.convert_file(PROJECT_PATH + '/README.md', 'rst')
 except(IOError, ImportError):
     readme = open('README.md').read()
 
 setup(
     name="pyroombaadapter",
-    version="0.1.6",
+    version="0.1.0",
     url="https://github.com/AtsushiSakai/PyRoombaAdapter",
     author="Atsushi Sakai",
     author_email="asakaig@gmail.com",

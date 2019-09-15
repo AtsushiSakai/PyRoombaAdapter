@@ -18,9 +18,11 @@ This module is only tested on Roomba 690 model.
 
 # Install
 
-You can use pip to install it.
+You can use setup.py to install it.
 
-    $ pip install PyRoombaAdapter
+    $ git clone https://github.com/AtsushiSakai/PyRoombaAdapter.git
+
+    $ sudo python PyRoombaAdapter/setup.py install
 
 # Requirements
 
