@@ -38,13 +38,14 @@ Please check the document for all API and usages.
 
 # Usage examples
 
-All examples are in /exmaples directory.
+All examples are in examples directory.
+
 
 ## Go and back example
 
 This example uses "move" API.
 
-- [move API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+- [move API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
 
 ```python
 """
@@ -66,13 +67,13 @@ adapter.move(0, np.deg2rad(20))  # turn left
 sleep(6.0)
 ```
 
-## Play song 1 
+## Play song1 
 
 This example uses "send_song_cmd" and "send_play_cmd" API.
 
-- [send_song_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
+- [send_song_cmd API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
 
-- [send_play_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+- [send_play_cmd API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_play_cmd)
 
 ```python
 """
@@ -92,17 +93,17 @@ adapter.send_play_cmd(0)
 sleep(10.0)
 ```
 
-## Play song 2 
+## Play song2 
 
 This example uses "send_song_cmd" and "send_play_cmd" API.
 
-- [send_song_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
+- [send_song_cmd API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
 
-- [send_play_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+- [send_play_cmd API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_play_cmd)
 
 ```python
 """
-    Play Darth Vader song
+    Play namidaga kirari by spitz
 """
 from time import sleep
 
@@ -111,11 +112,37 @@ from pyroombaadapter import PyRoombaAdapter
 PORT = "/dev/ttyUSB0"
 adapter = PyRoombaAdapter(PORT)
 
-adapter.send_song_cmd(0, 9,
-                      [69, 69, 69, 65, 72, 69, 65, 72, 69],
-                      [40, 40, 40, 30, 10, 40, 30, 10, 80])
+adapter.send_song_cmd(0, 10,
+                      [66, 67, 69, 67, 66, 62, 64, 66, 67, 66],
+                      [16, 16, 16, 32, 32, 16, 16, 16, 16, 64])
+
+sleep(1.0)
+adapter.send_song_cmd(1, 9,
+                      [66, 67, 69, 67, 66, 71, 59, 62, 61],
+                      [16, 16, 16, 32, 32, 32, 16, 16, 64])
+
+sleep(1.0)
+adapter.send_song_cmd(2, 13,
+                      [62, 64, 61, 62, 64, 66, 62, 64, 66, 67, 64, 66, 71],
+                      [16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16])
+sleep(1.0)
+adapter.send_song_cmd(3, 7,
+                      [71, 67, 64, 62, 61, 62, 62],
+                      [16, 16, 16, 16, 48, 16, 64])
+
+sleep(3.0)
 adapter.send_play_cmd(0)
-sleep(10.0)
+sleep(4.0)
+adapter.send_play_cmd(1)
+sleep(4.0)
+adapter.send_play_cmd(0)
+sleep(4.0)
+adapter.send_play_cmd(1)
+sleep(4.0)
+adapter.send_play_cmd(2)
+sleep(4.0)
+adapter.send_play_cmd(3)
+sleep(4.0)
 ```
 
 # Contribution
@@ -131,3 +158,5 @@ MIT
 # Authors
 
 - [Atsushi Sakai](https://github.com/AtsushiSakai/)
+
+
