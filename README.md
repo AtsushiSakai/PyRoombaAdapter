@@ -42,9 +42,13 @@ All examples are in /exmaples directory.
 
 ## Go and back example
 
+This example uses "move" API.
+
+- [move API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+
 ```python
 """
-    Go and  back example with roomba
+    Go and back example with roomba
 """
 from time import sleep
 import numpy as np
@@ -62,6 +66,57 @@ adapter.move(0, np.deg2rad(20))  # turn left
 sleep(6.0)
 ```
 
+## Play song 1 
+
+This example uses "send_song_cmd" and "send_play_cmd" API.
+
+- [send_song_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
+
+- [send_play_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+
+```python
+"""
+    Play Darth Vader song
+"""
+from time import sleep
+
+from pyroombaadapter import PyRoombaAdapter
+
+PORT = "/dev/ttyUSB0"
+adapter = PyRoombaAdapter(PORT)
+
+adapter.send_song_cmd(0, 9,
+                      [69, 69, 69, 65, 72, 69, 65, 72, 69],
+                      [40, 40, 40, 30, 10, 40, 30, 10, 80])
+adapter.send_play_cmd(0)
+sleep(10.0)
+```
+
+## Play song 2 
+
+This example uses "send_song_cmd" and "send_play_cmd" API.
+
+- [send_song_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
+
+- [send_play_cmd API — PyRoombaAdapter 0\.1\.0 documentation](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move)
+
+```python
+"""
+    Play Darth Vader song
+"""
+from time import sleep
+
+from pyroombaadapter import PyRoombaAdapter
+
+PORT = "/dev/ttyUSB0"
+adapter = PyRoombaAdapter(PORT)
+
+adapter.send_song_cmd(0, 9,
+                      [69, 69, 69, 65, 72, 69, 65, 72, 69],
+                      [40, 40, 40, 30, 10, 40, 30, 10, 80])
+adapter.send_play_cmd(0)
+sleep(10.0)
+```
 
 # Contribution
 
