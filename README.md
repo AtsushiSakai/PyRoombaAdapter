@@ -40,6 +40,7 @@ Please check the document for all API and usages.
 
 All examples are in examples directory.
 
+Click each image to see each example movie.
 
 ## Go and back example
 
@@ -69,6 +70,8 @@ sleep(6.0)
 
 ## Play song1 
 
+[![](https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg)](https://www.youtube.com/watch?v=0XqpQq7PQ8I)
+
 This example uses "send_song_cmd" and "send_play_cmd" API.
 
 - [send_song_cmd API](https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd)
@@ -94,6 +97,8 @@ sleep(10.0)
 ```
 
 ## Play song2 
+
+[![](https://img.youtube.com/vi/nYstniMkJo0/0.jpg)](https://www.youtube.com/watch?v=nYstniMkJo0)
 
 This example uses "send_song_cmd" and "send_play_cmd" API.
 
@@ -144,10 +149,6 @@ sleep(4.0)
 adapter.send_play_cmd(3)
 sleep(4.0)
 ```
-
-# Movies
-
-[![](https://img.youtube.com/vi/pJcCACXEH68/0.jpg)](https://www.youtube.com/watch?v=pJcCACXEH68)
 
 # Contribution
 
