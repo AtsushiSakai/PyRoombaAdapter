@@ -190,7 +190,7 @@ class PyRoombaAdapter:
         """
         # send command
         self._send_cmd(self.CMD["Start"])
-        self._send_cmd(self.CMD["Safe"])
+        self._send_cmd(self.CMD["Full"])
 
         # TODO implement
         # check mode
