@@ -1,3 +1,9 @@
+## 0.1.2 (January 28, 2021)
+  - bump version
+  - Merge pull request #4 from hirohashi/patch-1
+  - Modification of change_mode_to_full function.
+  - Release v0.1.1
+
 ## 0.1.1 (September 15, 2019)
 
 
