@@ -29,6 +29,7 @@ setup(
     maintainer_email='asakaig@gmail.com',
     description="A Python library for Roomba Open Interface",
     long_description=readme,
+    long_description_content_type="text/markdown",
     python_requires='>3.6.0',
     license="MIT",
     keywords="python roomba",
