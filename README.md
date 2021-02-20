@@ -4,6 +4,10 @@
 
 A Python library for Roomba Open Interface
 
+[![Downloads](https://pepy.tech/badge/pyroombaadapter)](https://pepy.tech/project/pyroombaadapter)
+[![Downloads](https://pepy.tech/badge/pyroombaadapter/month)](https://pepy.tech/project/pyroombaadapter)
+[![Downloads](https://pepy.tech/badge/pyroombaadapter/week)](https://pepy.tech/project/pyroombaadapter)
+
 # What is this?
 
 This is a python library for Roomba Open Interface(ROI)
