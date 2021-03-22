@@ -318,10 +318,10 @@ class PyRoombaAdapter:
             >>> sleep(2.0) # keep 2 sec
         """
         right_mm_sec = self._adjust_min_max(right_mm_sec, self.PARAMS["MIN_VELOCITY"], self.PARAMS["MAX_VELOCITY"])
-        right_high, right_low = byte_tool.get_2_bytes(right_mm_sec)
+        right_high, right_low = self._get_2_bytes(right_mm_sec)
 
         left_mm_sec = self._adjust_min_max(left_mm_sec, self.PARAMS["MIN_VELOCITY"], self.PARAMS["MAX_VELOCITY"])
-        left_high, left_low = byte_tool.get_2_bytes(left_mm_sec)
+        left_high, left_low = self._get_2_bytes(left_mm_sec)
 
         # send these bytes and set the stored velocities
         self._send_cmd([self.CMD["Drive Direct"], right_high, right_low, left_high, left_low])
@@ -347,10 +347,10 @@ class PyRoombaAdapter:
             >>> sleep(2.0) # keep 2 sec
         """
         right_pwm = self._adjust_min_max(right_pwm, -255, 255)
-        right_high, right_low = byte_tool.get_2_bytes(right_pwm)
+        right_high, right_low = self._get_2_bytes(right_pwm)
 
         left_pwm = self._adjust_min_max(left_pwm, -255, 255)
-        left_high, left_low = byte_tool.get_2_bytes(left_pwm)
+        left_high, left_low = self._get_2_bytes(left_pwm)
 
         # send these bytes and set the stored velocities
         self._send_cmd([self.CMD["Drive PWM"], right_high, right_low, left_high, left_low])
