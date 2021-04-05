@@ -70,7 +70,7 @@ class PyRoombaAdapter:
         try:
             self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
         except serial.SerialException:
-            print("Cannot find serial port. Plase reconnect it.")
+            print("Cannot find serial port. Please reconnect it.")
             sys.exit(1)
 
         self.change_mode_to_safe()  # default mode is safe mode
