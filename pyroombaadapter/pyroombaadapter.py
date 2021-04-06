@@ -69,8 +69,8 @@ class PyRoombaAdapter:
         self.WHEEL_SPAN = wheel_span_mm
         try:
             self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
-        except SerialException: 
-            print("Cannot find serial port. Plase reconnect it.")
+        except serial.SerialException:
+            print("Cannot find serial port. Please reconnect it.")
             sys.exit(1)
 
         self.change_mode_to_safe()  # default mode is safe mode
@@ -82,10 +82,13 @@ class PyRoombaAdapter:
 
         The Destructor make Roomba move to passive mode and close serial connection
         """
-        # disconnect sequence
-        self._send_cmd(self.CMD["Start"])  # move to passive mode
-        sleep(0.1)
-        self.serial_con.close()
+        # The `self.serial_con` attribute may not exist if an exception is
+        # encountered in `__init__()`
+        if getattr(self, "serial_con", None):
+            # disconnect sequence
+            self._send_cmd(self.CMD["Start"])  # move to passive mode
+            sleep(0.1)
+            self.serial_con.close()
 
     def start_cleaning(self):
         """
