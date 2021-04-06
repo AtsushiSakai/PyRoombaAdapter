@@ -1,3 +1,10 @@
+## 0.1.3 (March 22, 2021)
+  - Merge pull request #9 from process1183/drive_fix
+  - [#8] Fix send_drive_direct() and send_drive_pwm() methods
+  - Merge pull request #7 from AtsushiSakai/issue_6
+  - update setup.py
+  - fix setup py
+
 ## 0.1.2 (January 28, 2021)
   - Merge pull request #4 from hirohashi/patch-1
   - Modification of change_mode_to_full function.
@@ -23,6 +30,5 @@
   - Create FUNDING.yml
   - add doc setting
   - move function working
-  - initial commit
   - Initial commit
 

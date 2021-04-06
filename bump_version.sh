@@ -88,4 +88,21 @@ else
     fi
 fi
 
+echo -e "Start PyPI releasing.."
+echo -e "Clean up dist dir"
+rm -rf dist/*
+
+echo -e "Create zip file"
+python setup.py sdist
+
+if type twine > /dev/null 2>&1; then 
+    echo -e "Check update possible"
+    twine check dist/pyroombaadapter-*.tar.gz
+    echo -e "Uploading.."
+    twine upload --repository pypi dist/pyroombaadapter-*.tar.gz
+else
+    echo -e "twine is not installed..."
+fi
+
+
 echo -e "${NOTICE_FLAG} Finished."
