@@ -1,3 +1,11 @@
+## 0.1.4 (April 06, 2021)
+  - Merge pull request #15 from AtsushiSakai/issue_11
+  - add release script
+  - Merge pull request #14 from process1183/serialexception
+  - [#13] Check for the serial connection in the destructor
+  - Fix typo in SerialException message.
+  - [#13] Fix for SerialException NameError
+
 ## 0.1.3 (March 22, 2021)
   - Merge pull request #9 from process1183/drive_fix
   - [#8] Fix send_drive_direct() and send_drive_pwm() methods
