@@ -82,10 +82,13 @@ class PyRoombaAdapter:
 
         The Destructor make Roomba move to passive mode and close serial connection
         """
-        # disconnect sequence
-        self._send_cmd(self.CMD["Start"])  # move to passive mode
-        sleep(0.1)
-        self.serial_con.close()
+        # The `self.serial_con` attribute may not exist if an exception is
+        # encountered in `__init__()`
+        if getattr(self, "serial_con", None):
+            # disconnect sequence
+            self._send_cmd(self.CMD["Start"])  # move to passive mode
+            sleep(0.1)
+            self.serial_con.close()
 
     def start_cleaning(self):
         """
