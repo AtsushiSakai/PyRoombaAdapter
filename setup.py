@@ -6,6 +6,10 @@ How to upload new release
 3. create zip file: python setup.py sdist
 4. check upload possible: twine check dist/pyroombaadapter-0.1.2.tar.gz
 5 upload: twine upload --repository pypi dist/pyroombaadapter-0.1.2.tar.gz
+
+PyPI upload test
+twine upload --repository pypitest dist/pyroombaadapter-0.1.8.tar.gz
+pip install --upgrade -i https://test.pypi.org/simple/ pyroombaadapter
 """
 import os
 
