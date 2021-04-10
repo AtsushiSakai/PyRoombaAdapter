@@ -1,3 +1,8 @@
+## 0.1.5 (April 10, 2021)
+  - Merge pull request #17 from AtsushiSakai/issue16
+  - fix VERSION file not included issue
+  - added automatic releases function for bump_version.sh
+
 ## 0.1.4 (April 06, 2021)
   - Merge pull request #15 from AtsushiSakai/issue_11
   - add release script
