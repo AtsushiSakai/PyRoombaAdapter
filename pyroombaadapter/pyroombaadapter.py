@@ -69,9 +69,8 @@ class PyRoombaAdapter:
         self.WHEEL_SPAN = wheel_span_mm
         try:
             self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
-        except serial.SerialException:
-            print("Cannot find serial port. Please reconnect it.")
-            sys.exit(1)
+        except serial.SerialException as exc:
+            raise ConnectionError(f"Cannot find serial port ('{port}'). Please reconnect it.") from exc
 
         self.change_mode_to_safe()  # default mode is safe mode
         sleep(1.0)
