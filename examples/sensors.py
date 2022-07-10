@@ -2,7 +2,6 @@
     Read Roomba sensors
 """
 from time import sleep
-
 from pyroombaadapter import PyRoombaAdapter
 
 PORT = "/dev/ttyUSB0"
