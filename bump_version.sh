@@ -63,6 +63,7 @@ if [ -f VERSION ]; then
     git commit -m "Bump version to ${INPUT_STRING}."
     git tag -a -m "Tag version ${INPUT_STRING}." "v$INPUT_STRING"
     git push origin --tags
+    git push origin master
 else
     echo -e "${WARNING_FLAG} Could not find a VERSION file."
     echo -ne "${QUESTION_FLAG} ${CYAN}Do you want to create a version file and start from scratch? [${WHITE}y${CYAN}]: "
