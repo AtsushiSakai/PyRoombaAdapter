@@ -69,9 +69,8 @@ class PyRoombaAdapter:
         self.WHEEL_SPAN = wheel_span_mm
         try:
             self.serial_con = self._connect_serial(port, bau_rate, time_out_sec)
-        except serial.SerialException:
-            print("Cannot find serial port. Please reconnect it.")
-            sys.exit(1)
+        except serial.SerialException as exc:
+            raise ConnectionError(f"Cannot find serial port ('{port}'). Please reconnect it.") from exc
 
         self.change_mode_to_safe()  # default mode is safe mode
         sleep(1.0)
@@ -246,11 +245,11 @@ class PyRoombaAdapter:
         :param float yaw_rate: yaw rate (rad/sec)
 
         Examples:
-            >>> import numpy as np
+            >>> import math
             >>> import time
             >>> PORT = "/dev/ttyUSB0"
             >>> adapter = PyRoombaAdapter(PORT)
-            >>> adapter.move(0, np.rad2deg(-10)) # rotate to right side
+            >>> adapter.move(0, math.radians(-10)) # rotate to right side
             >>> time.sleep(1.0) # keep rotate
             >>> adapter.move(0.1, 0.0) # move straight with 10cm/sec
         """
@@ -616,8 +615,8 @@ def main():
     adapter = PyRoombaAdapter(PORT)
     # adapter.send_drive_cmd(-100, -1000)
     # adapter.send_drive_direct(-100, 100)
-    import numpy as np
-    # adapter.move(0.1, np.deg2rad(-10))
+    import math
+    # adapter.move(0.1, math.radians(-10))
     # adapter.send_drive_pwm(80, 80)
     # adapter.send_drive_pwm(-200, -200)
     # adapter.send_moters_cmd(False, True, True, True, False)
@@ -625,13 +624,13 @@ def main():
     # adapter.send_buttons_cmd(dock=True)
     # sleep(1.0)
 
-    adapter.move(0.2, np.deg2rad(0.0))
+    adapter.move(0.2, math.radians(0.0))
     sleep(1.0)
-    adapter.move(0, np.deg2rad(-20))
+    adapter.move(0, math.radians(-20))
     sleep(6.0)
-    adapter.move(0.2, np.deg2rad(0.0))
+    adapter.move(0.2, math.radians(0.0))
     sleep(1.0)
-    adapter.move(0, np.deg2rad(20))
+    adapter.move(0, math.radians(20))
     sleep(6.0)
 
     # adapter.move(-0.1, 0)
