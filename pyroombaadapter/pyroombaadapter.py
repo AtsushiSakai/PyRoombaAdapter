@@ -575,16 +575,16 @@ class PyRoombaAdapter:
         raw = self.serial_con.read(self.SENSOR[sensor][1])
         return int.from_bytes(raw, byteorder='big', signed=self.SENSOR[sensor][2])
 
-    def request_charge_state(self):
+    def request_charging_state(self):
         """
         requests charging state
 
         This function returns one of following Roomba’s current charging states:
-        0 = Not charging
-        1 = Reconditioning Charging
-        2 = Full Charging
-        3 = Trickle Charging
-        4 = Waiting
+        0 = Not charging, 
+        1 = Reconditioning Charging, 
+        2 = Full Charging, 
+        3 = Trickle Charging, 
+        4 = Waiting, 
         5 = Charging Fault Condition
 
         :return: State 0-5
@@ -621,7 +621,7 @@ class PyRoombaAdapter:
 
         :param bool celsius: true if celsius, false for fahrenheit
 
-        :return: Temperature in range: -128 – 127
+        :return: Temperature in range: -128 – 127 Celsius or converted in Fahrenheit
         """
         temp = self._request_sensor("Temperature")
         if not celsius:
@@ -654,23 +654,23 @@ class PyRoombaAdapter:
         requests corrent OI mode
 
         This function returns the current OI mode. Modes see in following table:
-        0 = Off
-        1 = Passive
-        2 = Safe
+        0 = Off, 
+        1 = Passive, 
+        2 = Safe, 
         3 = Full
 
         :return: State 0-3
         """
         return self._request_sensor("OI Mode")
 
-    def start_data_stream(self, sensors_list):
+    def data_stream_start(self, sensors_list):
         """
         starts data stream
 
         This function issues command which starts a stream of data packets. The provided list of packets is sent
         every 15 ms, which is the rate Roomba uses to update data.
 
-        :param list sensors_list: ["Charging State", "Voltage", "Current", "Temperature", "Battery Charge",
+        :param list sensors_list: One or more from following sensors: ["Charging State", "Voltage", "Current", "Temperature", "Battery Charge",
                                    "Battery Capacity", "OI Mode"]
 
         Examples:
@@ -690,7 +690,7 @@ class PyRoombaAdapter:
             request.extend(stream)
             self._send_cmd(request)
 
-    def stop_data_stream(self):
+    def data_stream_stop(self):
         """
         stops data stream
 
@@ -699,7 +699,7 @@ class PyRoombaAdapter:
         self._send_cmd([self.CMD["Stream"], 0])
         self.stream_sensors = {}
 
-    def read_data_stream(self):
+    def data_stream_read(self):
         """
         reads data stream
 

@@ -9,7 +9,7 @@ adapter = PyRoombaAdapter(PORT)
 adapter.change_mode_to_passive()
 
 # Request sensor value manually
-print(adapter.request_charge_state())
+print(adapter.request_charging_state())
 print(adapter.request_voltage())
 print(adapter.request_current())
 print(adapter.request_temperature())
@@ -18,13 +18,13 @@ print(adapter.request_capacity())
 print(adapter.request_oi_mode())
 
 # Read sensor value from data stream
-adapter.start_data_stream(
+adapter.data_stream_start(
     ["Charging State", "Voltage", "Current", "Temperature", "Battery Charge", "Battery Capacity", "OI Mode"])
 sleep(1)
-print(adapter.read_data_stream())
+print(adapter.data_stream_read())
 sleep(1)
-print(adapter.read_data_stream())
+print(adapter.data_stream_read())
 sleep(1)
-print(adapter.read_data_stream())
+print(adapter.data_stream_read())
 sleep(1)
-adapter.stop_data_stream()
+adapter.data_stream_stop()
