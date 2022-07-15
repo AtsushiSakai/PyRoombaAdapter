@@ -65,6 +65,17 @@ class PyRoombaAdapter:
         "MAX_VELOCITY": 500,
     }
 
+    SENSOR = {
+        # "Name", (Packet ID, Data Bytes, signed)
+        "Charging State": (21, 1, False),
+        "Voltage": (22, 2, False),
+        "Current": (23, 2, True),
+        "Temperature": (24, 1, True),
+        "Battery Charge": (25, 2, False),
+        "Battery Capacity": (26, 2, False),
+        "OI Mode": (35, 1, False)
+    }
+
     def __init__(self, port, bau_rate=115200, time_out_sec=1., wheel_span_mm=235.0):
         self.WHEEL_SPAN = wheel_span_mm
         try:
@@ -73,6 +84,7 @@ class PyRoombaAdapter:
             raise ConnectionError(f"Cannot find serial port ('{port}'). Please reconnect it.") from exc
 
         self.change_mode_to_safe()  # default mode is safe mode
+        self.stream_sensors = {}
         sleep(1.0)
 
     def __del__(self):
@@ -552,6 +564,176 @@ class PyRoombaAdapter:
             >>> sleep(10.0) # keep playing
         """
         self._send_cmd([self.CMD["Play"], song_number])
+
+    def _request_sensor(self, sensor):
+        """
+        Requests sensor value from Roomba and returns interpreted value.
+        :param sensor: Sensor name from SENSOR dictionary
+        :return: int sensor value
+        """
+        self._send_cmd([self.CMD["Sensors"], self.SENSOR[sensor][0]])
+        raw = self.serial_con.read(self.SENSOR[sensor][1])
+        return int.from_bytes(raw, byteorder='big', signed=self.SENSOR[sensor][2])
+
+    def request_charging_state(self):
+        """
+        requests charging state
+
+        This function returns one of following Roomba’s current charging states:
+        0 = Not charging, 
+        1 = Reconditioning Charging, 
+        2 = Full Charging, 
+        3 = Trickle Charging, 
+        4 = Waiting, 
+        5 = Charging Fault Condition
+
+        :return: State 0-5
+        """
+        return self._request_sensor("Charging State")
+
+    def request_voltage(self):
+        """
+        requests battery voltage
+
+        This function returns the current voltage of Roomba’s battery in millivolts (mV).
+
+        :return: Voltage in range: 0 – 65535 mV
+        """
+        return self._request_sensor("Voltage")
+
+    def request_current(self):
+        """
+        requests battery current
+
+        The current in milliamps (mA) flowing into or out of Roomba’s battery. Negative currents indicate that the
+        current is flowing out of the battery, as during normal running. Positive currents indicate that the current
+        is flowing into the battery, as during charging.
+
+        :return: Current in range: -32768 – 32767 mA
+        """
+        return self._request_sensor("Current")
+
+    def request_temperature(self, celsius=True):
+        """
+        requests battery temperature
+
+        This command requests the temperature of Roomba’s battery in degrees Celsius.
+
+        :param bool celsius: true if celsius, false for fahrenheit
+
+        :return: Temperature in range: -128 – 127 Celsius or converted in Fahrenheit
+        """
+        temp = self._request_sensor("Temperature")
+        if not celsius:
+            temp = (temp * 1.8) + 32
+        return temp
+
+    def request_charge(self):
+        """
+        requests battery charge
+
+        Returns the current charge of Roomba’s battery in milliamp-hours (mAh). The charge value decreases as the
+        battery is depleted during running and increases when the battery is charged.
+
+        :return: Charge in range: 0 – 65535 mAh
+        """
+        return self._request_sensor("Battery Charge")
+
+    def request_capacity(self):
+        """
+        requests estimated battery capacity
+
+        Returns the estimated charge capacity of Roomba’s battery in milliamp-hours (mAh).
+
+        :return: Capacity in range: 0 – 65535 mAh
+        """
+        return self._request_sensor("Battery Capacity")
+
+    def request_oi_mode(self):
+        """
+        requests corrent OI mode
+
+        This function returns the current OI mode. Modes see in following table:
+        0 = Off, 
+        1 = Passive, 
+        2 = Safe, 
+        3 = Full
+
+        :return: State 0-3
+        """
+        return self._request_sensor("OI Mode")
+
+    def data_stream_start(self, sensors_list):
+        """
+        starts data stream
+
+        This function issues command which starts a stream of data packets. The provided list of packets is sent
+        every 15 ms, which is the rate Roomba uses to update data.
+
+        :param list sensors_list: One or more from following sensors: ["Charging State", "Voltage", "Current", "Temperature", "Battery Charge",
+                                   "Battery Capacity", "OI Mode"]
+
+        Examples:
+            >>> adapter = PyRoombaAdapter("/dev/ttyUSB0")
+            >>> adapter.start_data_stream(["Charging State", "Voltage", "Temperature"])
+            >>> print(adapter.read_data_stream()) # list with values
+
+        """
+        self.stream_sensors = {}
+        stream = []
+        for sensor in sensors_list:
+            self.stream_sensors.update({self.SENSOR[sensor][0]: (self.SENSOR[sensor][1], self.SENSOR[sensor][2])})
+            stream.append(self.SENSOR[sensor][0])
+
+        if len(stream) > 0:
+            request = [self.CMD["Stream"], len(stream)]
+            request.extend(stream)
+            self._send_cmd(request)
+
+    def data_stream_stop(self):
+        """
+        stops data stream
+
+        Stops data stream and resets sensors list.
+        """
+        self._send_cmd([self.CMD["Stream"], 0])
+        self.stream_sensors = {}
+
+    def data_stream_read(self):
+        """
+        reads data stream
+
+        Reads stream of sensor data packets from Roomba.
+
+        :return: list with sensors values or empty list on error
+
+        Examples:
+            >>> adapter = PyRoombaAdapter("/dev/ttyUSB0")
+            >>> adapter.start_data_stream(["Charging State", "Voltage", "Temperature"])
+            >>> print(adapter.read_data_stream()) # [0, 15530, 20]
+        """
+        result = []
+
+        header_magic = self.serial_con.read(1)
+        if header_magic == b'\x13':
+            data_len = self.serial_con.read(1)
+            data = self.serial_con.read(int.from_bytes(data_len, byteorder='big'))
+            checksum = self.serial_con.read(1)
+            calculated_checksum = sum(bytes(header_magic + data_len + data + checksum))
+            if (calculated_checksum & 0xFF) == 0:
+                data_pos = 0
+                while data_pos < len(data):
+                    packet_id = int.from_bytes(data[data_pos:data_pos + 1], byteorder='big')
+                    data_pos += 1
+
+                    packet_size = self.stream_sensors[packet_id][0]
+                    packet_data = data[data_pos:data_pos + packet_size]
+                    data_pos += packet_size
+
+                    result.append(
+                        int.from_bytes(packet_data, byteorder='big', signed=self.stream_sensors[packet_id][1]))
+
+        return result
 
     @staticmethod
     def _connect_serial(port, bau_rate, time_out):
