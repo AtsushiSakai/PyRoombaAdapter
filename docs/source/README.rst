@@ -177,7 +177,7 @@ Read sensors
 There are two ways how to read sensor values. Request manually on
 demand:
 
-::
+.. code:: python
 
    """
        Read Roomba sensors
@@ -200,7 +200,7 @@ demand:
 
 Start a data stream:
 
-::
+.. code:: python
 
    """
        Read Roomba sensors

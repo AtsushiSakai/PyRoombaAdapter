@@ -159,7 +159,7 @@ sleep(4.0)
 ## Read sensors
 There are two ways how to read sensor values. Request manually on demand:
 
-```
+```python
 """
     Read Roomba sensors
 """
@@ -182,7 +182,7 @@ print(adapter.request_oi_mode())
 
 Start a data stream:
 
-```
+```python
 """
     Read Roomba sensors
 """
