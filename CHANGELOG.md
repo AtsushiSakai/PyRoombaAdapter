@@ -1,7 +1,13 @@
+## 0.2.0 (July 15, 2022)
+  - implemented API to get Sensor Packets
+  - update doc system
+
 ## 0.1.5 (April 10, 2021)
   - Merge pull request #17 from AtsushiSakai/issue16
   - fix VERSION file not included issue
   - added automatic releases function for bump_version.sh
+  - Issue #18 Replace np.deg2rad(x) to math.radians(x) in examples and docs
+  - Replace sys.exit(1) to exception chaining for ability catch and recovery
 
 ## 0.1.4 (April 06, 2021)
   - Merge pull request #15 from AtsushiSakai/issue_11
