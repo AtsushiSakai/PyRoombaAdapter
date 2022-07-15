@@ -3,6 +3,8 @@ PyRoombaAdapter
 
 A Python library for Roomba Open Interface
 
+|Downloads| |image1| |image2|
+
 What is this?
 =============
 
@@ -54,7 +56,7 @@ Click each image to see each example movie.
 Go and back example
 -------------------
 
-|image0|
+|image3|
 
 This example uses “move” API.
 
@@ -84,7 +86,7 @@ This example uses “move” API.
 Play song1
 ----------
 
-|image1|
+|image4|
 
 This example uses “send_song_cmd” and “send_play_cmd” API.
 
@@ -115,7 +117,7 @@ This example uses “send_song_cmd” and “send_play_cmd” API.
 Play song2
 ----------
 
-|image2|
+|image5|
 
 This example uses “send_song_cmd” and “send_play_cmd” API.
 
@@ -239,9 +241,15 @@ Authors
 
 -  `Atsushi Sakai <https://github.com/AtsushiSakai/>`__
 
-.. |image0| image:: https://img.youtube.com/vi/rGppIKN-roE/0.jpg
+.. |Downloads| image:: https://pepy.tech/badge/pyroombaadapter
+   :target: https://pepy.tech/project/pyroombaadapter
+.. |image1| image:: https://pepy.tech/badge/pyroombaadapter/month
+   :target: https://pepy.tech/project/pyroombaadapter
+.. |image2| image:: https://pepy.tech/badge/pyroombaadapter/week
+   :target: https://pepy.tech/project/pyroombaadapter
+.. |image3| image:: https://img.youtube.com/vi/rGppIKN-roE/0.jpg
    :target: https://www.youtube.com/watch?v=rGppIKN-roE
-.. |image1| image:: https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg
+.. |image4| image:: https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg
    :target: https://www.youtube.com/watch?v=0XqpQq7PQ8I
-.. |image2| image:: https://img.youtube.com/vi/nYstniMkJo0/0.jpg
+.. |image5| image:: https://img.youtube.com/vi/nYstniMkJo0/0.jpg
    :target: https://www.youtube.com/watch?v=nYstniMkJo0
