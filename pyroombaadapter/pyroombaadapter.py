@@ -67,13 +67,55 @@ class PyRoombaAdapter:
 
     SENSOR = {
         # "Name", (Packet ID, Data Bytes, signed)
+        "Wheel Drops": (7, 1, False),
+        "Wall": (8, 1, False),
+        "Cliff Left": (9, 1, False),
+        "Cliff Front Left": (10, 1, False),
+        "Cliff Front Right": (11, 1, False),
+        "Cliff Right": (12, 1, False),
+        "Virtual Wall": (13, 1, False),
+        "Wheel Overcurrent": (14, 1, False),
+        "Dirt Detect": (15, 1, False),
+        "IFR Char Omni": (17, 1, False),
+        "Buttons": (18, 1, False),
+        "Distance": (19, 2, True),
+        "Angle": (20, 2, True),
         "Charging State": (21, 1, False),
         "Voltage": (22, 2, False),
         "Current": (23, 2, True),
         "Temperature": (24, 1, True),
         "Battery Charge": (25, 2, False),
         "Battery Capacity": (26, 2, False),
-        "OI Mode": (35, 1, False)
+        # Wall Signal (packet 27) is depreciated
+        "Cliff Left Signal": (28, 2, False),
+        "Cliff Front Left Signal": (29, 2, False),
+        "Cliff Front Right Signal": (30, 2, False),
+        "Cliff Right Signal": (31, 2, False),
+        "Charging Sources Available": (34, 1, False),
+        "OI Mode": (35, 1, False),
+        "Song Number": (36, 1, False),
+        "Song Playing": (37, 1, False),
+        "Number of Stream Packets": (38, 1, False),
+        "Requested Velocity": (39, 2, True),
+        "Requested Radius": (40, 2, True),
+        "Requested Right Velocity": (41, 2, True),
+        "Requested Left Velocity": (42, 2, True),
+        "Left Encoder Counts": (43, 2, True),
+        "Right Encoder Counts": (44, 2, True),
+        "Light Bumper": (45, 1, False),
+        "Light Bump Left Signal": (46, 2, False),
+        "Light Bump Front Left Signal": (47, 2, False),
+        "Light Bump Front Center Left Signal": (48, 2, False),
+        "Light Bump Front Center Right Signal": (49, 2, False),
+        "Light Bump Front Right Signal": (50, 2, False),
+        "Light Bump Right Signal": (51, 2, False),
+        "IFR Char Left": (52, 1, False),
+        "IFR Char Right": (53, 1, False),
+        "Left Motor Current": (54, 2, True),
+        "Right Motor Current": (55, 2, True),
+        "Main Brush Motor Current": (56, 2, True),
+        "Side Brush Motor Current": (57, 2, True),
+        "Stasis": (58, 1, False)
     }
 
     def __init__(self, port, bau_rate=115200, time_out_sec=1., wheel_span_mm=235.0):
@@ -649,6 +691,41 @@ class PyRoombaAdapter:
         """
         return self._request_sensor("Battery Capacity")
 
+    def request_distance(self):
+        """
+        Requests the Roomba's total distance traveled since it was last checked.
+
+        Returns distance traveled in millimeters (mm) since the distance was last requested. Average between both
+        wheel distances.
+
+        :return: Output range ± 32768 mm
+        """
+        return self._request_sensor("Distance")
+
+    def request_angle(self):
+        """
+        Requests the angular displacement since it was last checked.
+
+        Returns the angle in radians that the Roomba has turned since the angle was last requested.
+        Counter-clockwise is defined positive.
+
+        :return: Output range ± 571.9 rad
+        """
+        # Return a value in radians to remain consistent with the rest of the library
+        return math.radians(self._request_sensor("Angle"))
+
+    def request_encoder_counts(self):
+        """
+        Requests the raw Roomba encoder counts.
+
+        Returns a tuple containing the following: (left count, right count).
+        Linear distance traversed by each wheel is defined by the following:
+        distance = (π * 72.0 / 508.8) * count.
+
+        :return: Output range -32767 - 32768
+        """
+        return (self._request_sensor("Left Encoder Counts"), self._request_sensor("Right Encoder Counts"))
+    
     def request_oi_mode(self):
         """
         requests corrent OI mode
