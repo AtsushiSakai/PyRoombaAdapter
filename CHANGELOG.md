@@ -1,3 +1,7 @@
+## 0.3.0 (February 18, 2024)
+  - Fix official document site issue.
+  - Add remaining sensors from the OI interface spec to the sensors dict. Create request functions to better support encoder usage. Update examples and README.
+
 ## 0.2.0 (July 15, 2022)
   - implemented API to get Sensor Packets
   - update doc system
