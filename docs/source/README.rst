@@ -83,6 +83,9 @@ This example uses “move” API.
    adapter.move(0, math.radians(20))  # turn left
    sleep(6.0)
 
+   #Print the total distance traveled
+   print(f"distance: {adapter.request_distance()} mm, angle: {adapter.request_angle()} rad")
+
 Play song1
 ----------
 
@@ -197,6 +200,8 @@ demand:
    print(adapter.request_charge())
    print(adapter.request_capacity())
    print(adapter.request_oi_mode())
+   print(adapter.request_distance())
+   print(adapter.request_angle())
 
 Start a data stream:
 
