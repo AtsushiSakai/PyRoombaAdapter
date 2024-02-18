@@ -16,6 +16,8 @@ print(adapter.request_temperature())
 print(adapter.request_charge())
 print(adapter.request_capacity())
 print(adapter.request_oi_mode())
+print(adapter.request_distance())
+print(adapter.request_angle())
 
 # Read sensor value from data stream
 adapter.data_stream_start(

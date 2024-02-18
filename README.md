@@ -72,6 +72,9 @@ adapter.move(0.2, math.radians(0.0))  # go straight
 sleep(1.0)
 adapter.move(0, math.radians(20))  # turn left
 sleep(6.0)
+
+#Print the total distance traveled
+print(f"distance: {adapter.request_distance()} mm, angle: {adapter.request_angle()} rad")
 ```
 
 ## Play song1 
@@ -178,6 +181,8 @@ print(adapter.request_temperature())
 print(adapter.request_charge())
 print(adapter.request_capacity())
 print(adapter.request_oi_mode())
+print(adapter.request_distance())
+print(adapter.request_angle())
 ```
 
 Start a data stream:
