@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>PyRoombaAdapter &#8212; PyRoombaAdapter 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pyroombaadapter">
+<h1>PyRoombaAdapter<a class="headerlink" href="#pyroombaadapter" title="Permalink to this heading">¶</a></h1>
+<p>A Python library for Roomba Open Interface</p>
+<p><a class="reference external" href="https://pepy.tech/project/pyroombaadapter"><img alt="Downloads" src="https://pepy.tech/badge/pyroombaadapter" /></a> <a class="reference external" href="https://pepy.tech/project/pyroombaadapter"><img alt="image1" src="https://pepy.tech/badge/pyroombaadapter/month" /></a> <a class="reference external" href="https://pepy.tech/project/pyroombaadapter"><img alt="image2" src="https://pepy.tech/badge/pyroombaadapter/week" /></a></p>
+</section>
+<section id="what-is-this">
+<h1>What is this?<a class="headerlink" href="#what-is-this" title="Permalink to this heading">¶</a></h1>
+<p>This is a python library for Roomba Open Interface(ROI)</p>
+<p>This module is based on the document:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf">iRobot® Roomba 500 Open Interface (OI)
+Specification</a></p></li>
+</ul>
+<p>It aims to control a Roomba easily.</p>
+<p>This module is only tested on Roomba 690 model.</p>
+</section>
+<section id="install">
+<h1>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h1>
+<p>You can use pip to install it.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install pyroombaadapter
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pypi.org/project/pyroombaadapter/">pyroombaadapter ·
+PyPI</a></p></li>
+</ul>
+</section>
+<section id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Python 3.6.x or higher (2.7 is not supported)</p></li>
+<li><p><a class="reference external" href="https://pythonhosted.org/pyserial/">pyserial</a></p></li>
+</ul>
+</section>
+<section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h1>
+<p>Please check the document for all API and usages.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/">Welcome to PyRoombaAdapter’s
+documentation!</a></p></li>
+</ul>
+</section>
+<section id="usage-examples">
+<h1>Usage examples<a class="headerlink" href="#usage-examples" title="Permalink to this heading">¶</a></h1>
+<p>All examples are in examples directory.</p>
+<p>Click each image to see each example movie.</p>
+<section id="go-and-back-example">
+<h2>Go and back example<a class="headerlink" href="#go-and-back-example" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=rGppIKN-roE"><img alt="image3" src="https://img.youtube.com/vi/rGppIKN-roE/0.jpg" /></a></p>
+<p>This example uses “move” API.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.move">move
+API</a></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Go and back example with roomba</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">pyroombaadapter</span> <span class="kn">import</span> <span class="n">PyRoombaAdapter</span>
+
+<span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>  <span class="c1"># go straight</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">))</span>  <span class="c1"># turn right</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>  <span class="c1"># go straight</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>  <span class="c1"># turn left</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+
+<span class="c1">#Print the total distance traveled</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;distance: </span><span class="si">{</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_distance</span><span class="p">()</span><span class="si">}</span><span class="s2"> mm, angle: </span><span class="si">{</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_angle</span><span class="p">()</span><span class="si">}</span><span class="s2"> rad&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="play-song1">
+<h2>Play song1<a class="headerlink" href="#play-song1" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=0XqpQq7PQ8I"><img alt="image4" src="https://img.youtube.com/vi/0XqpQq7PQ8I/0.jpg" /></a></p>
+<p>This example uses “send_song_cmd” and “send_play_cmd” API.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd">send_song_cmd
+API</a></p></li>
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_play_cmd">send_play_cmd
+API</a></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Play Darth Vader song</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">from</span> <span class="nn">pyroombaadapter</span> <span class="kn">import</span> <span class="n">PyRoombaAdapter</span>
+
+<span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span>
+                      <span class="p">[</span><span class="mi">69</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">69</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">])</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="play-song2">
+<h2>Play song2<a class="headerlink" href="#play-song2" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="https://www.youtube.com/watch?v=nYstniMkJo0"><img alt="image5" src="https://img.youtube.com/vi/nYstniMkJo0/0.jpg" /></a></p>
+<p>This example uses “send_song_cmd” and “send_play_cmd” API.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd">send_song_cmd
+API</a></p></li>
+<li><p><a class="reference external" href="https://atsushisakai.github.io/PyRoombaAdapter/API.html#pyroombaadapter.PyRoombaAdapter.send_play_cmd">send_play_cmd
+API</a></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Play namidaga kirari by spitz</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">from</span> <span class="nn">pyroombaadapter</span> <span class="kn">import</span> <span class="n">PyRoombaAdapter</span>
+
+<span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+                      <span class="p">[</span><span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">66</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span>
+                      <span class="p">[</span><span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">61</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span>
+                      <span class="p">[</span><span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">71</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span>
+                      <span class="p">[</span><span class="mi">71</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">62</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="read-sensors">
+<h2>Read sensors<a class="headerlink" href="#read-sensors" title="Permalink to this heading">¶</a></h2>
+<p>There are two ways how to read sensor values. Request manually on
+demand:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read Roomba sensors</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">pyroombaadapter</span> <span class="kn">import</span> <span class="n">PyRoombaAdapter</span>
+
+<span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">change_mode_to_passive</span><span class="p">()</span>
+
+<span class="c1"># Request sensor value manually</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_charging_state</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_voltage</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_current</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_temperature</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_charge</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_capacity</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_oi_mode</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_distance</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_angle</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Start a data stream:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read Roomba sensors</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">pyroombaadapter</span> <span class="kn">import</span> <span class="n">PyRoombaAdapter</span>
+
+<span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">change_mode_to_passive</span><span class="p">()</span>
+
+<span class="c1"># Read sensor value from data stream</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">data_stream_start</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;Charging State&quot;</span><span class="p">,</span> <span class="s2">&quot;Voltage&quot;</span><span class="p">,</span> <span class="s2">&quot;Current&quot;</span><span class="p">,</span> <span class="s2">&quot;Temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;Battery Charge&quot;</span><span class="p">,</span> <span class="s2">&quot;Battery Capacity&quot;</span><span class="p">,</span> <span class="s2">&quot;OI Mode&quot;</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">data_stream_read</span><span class="p">())</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">data_stream_read</span><span class="p">())</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">data_stream_read</span><span class="p">())</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">adapter</span><span class="o">.</span><span class="n">data_stream_stop</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="contribution">
+<h1>Contribution<a class="headerlink" href="#contribution" title="Permalink to this heading">¶</a></h1>
+<p>Any contributions to this project are welcome!</p>
+<p>Feel free to make an issue and a PR to improve this OSS.</p>
+</section>
+<section id="license">
+<h1>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h1>
+<p>MIT</p>
+</section>
+<section id="authors">
+<h1>Authors<a class="headerlink" href="#authors" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/AtsushiSakai/">Atsushi Sakai</a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/icon.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyRoombaAdapter</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=AtsushiSakai&repo=PyRoombaAdapter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AtsushiSakai/PyRoombaAdapter/">GitHub</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+<h3 class="donation">Donate/support</h3>
+
+
+
+<p>
+<a class="badge" href="https://www.patreon.com/myenigma">
+<img src="https://img.shields.io/badge/donate-%E2%9D%A4%C2%A0-ff69b4.svg?style=flat" alt="Donate">
+</a>
+</p>
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Atsushi Sakai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/README.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/AtsushiSakai/PyRoombaAdapter" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

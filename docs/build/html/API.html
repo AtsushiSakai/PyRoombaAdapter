@@ -1,0 +1,786 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>API &#8212; PyRoombaAdapter 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="PyRoombaAdapter" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyroombaadapter">
+<span id="api"></span><h1>API<a class="headerlink" href="#module-pyroombaadapter" title="Permalink to this heading">¶</a></h1>
+<p>A Python adapter module for Roomba Open Interface</p>
+<p>This module is based on the document: iRobot® Roomba 500 Open Interface (OI) Specification
+- Link <a class="reference external" href="https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf">https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyroombaadapter.</span></span><span class="sig-name descname"><span class="pre">PyRoombaAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bau_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">115200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_out_sec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wheel_span_mm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">235.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adapter class for Roomba Open Interface</p>
+<p>The constructor connects serial port and change the mode to safe mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<em>string</em>) – Serial port path</p></li>
+<li><p><strong>bau_rate</strong> (<em>int</em>) – bau rate of serial connection (default=115200)</p></li>
+<li><p><strong>time_out_sec</strong> (<em>float</em>) – read time out of serial connection [sec] (default=1.0)</p></li>
+<li><p><strong>wheel_span_mm</strong> (<em>float</em>) – wheel span of Roomba [mm]  (default=235.0)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.__del__">
+<span class="sig-name descname"><span class="pre">__del__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.__del__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.__del__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destructor of PyRoombaAdapter class</p>
+<p>The Destructor make Roomba move to passive mode and close serial connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.change_mode_to_full">
+<span class="sig-name descname"><span class="pre">change_mode_to_full</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.change_mode_to_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.change_mode_to_full" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change mode to full mode</p>
+<p>Full mode turns off the cliff, wheel-drop and internal charger safety features.
+In Full mode, Roomba executes any command that you send it, even if the internal charger is plugged in,
+or command triggers a cliff or wheel drop condition.</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.change_mode_to_passive">
+<span class="sig-name descname"><span class="pre">change_mode_to_passive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.change_mode_to_passive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.change_mode_to_passive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change mode to passive mode</p>
+<p>Roomba beeps once to acknowledge it is starting from “off” mode.</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.change_mode_to_safe">
+<span class="sig-name descname"><span class="pre">change_mode_to_safe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.change_mode_to_safe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.change_mode_to_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change mode to safe mode</p>
+<p>Safe mode turns off all LEDs.
+If a safety condition occurs, Roomba reverts automatically to Passive mode.</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.data_stream_read">
+<span class="sig-name descname"><span class="pre">data_stream_read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.data_stream_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.data_stream_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads data stream</p>
+<p>Reads stream of sensor data packets from Roomba.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list with sensors values or empty list on error</p>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="s2">&quot;/dev/ttyUSB0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_data_stream</span><span class="p">([</span><span class="s2">&quot;Charging State&quot;</span><span class="p">,</span> <span class="s2">&quot;Voltage&quot;</span><span class="p">,</span> <span class="s2">&quot;Temperature&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">read_data_stream</span><span class="p">())</span> <span class="c1"># [0, 15530, 20]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.data_stream_start">
+<span class="sig-name descname"><span class="pre">data_stream_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sensors_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.data_stream_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.data_stream_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>starts data stream</p>
+<p>This function issues command which starts a stream of data packets. The provided list of packets is sent
+every 15 ms, which is the rate Roomba uses to update data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sensors_list</strong> (<em>list</em>) – One or more from following sensors: [“Charging State”, “Voltage”, “Current”, “Temperature”, “Battery Charge”,
+“Battery Capacity”, “OI Mode”]</p>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="s2">&quot;/dev/ttyUSB0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_data_stream</span><span class="p">([</span><span class="s2">&quot;Charging State&quot;</span><span class="p">,</span> <span class="s2">&quot;Voltage&quot;</span><span class="p">,</span> <span class="s2">&quot;Temperature&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">read_data_stream</span><span class="p">())</span> <span class="c1"># list with values</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.data_stream_stop">
+<span class="sig-name descname"><span class="pre">data_stream_stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.data_stream_stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.data_stream_stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>stops data stream</p>
+<p>Stops data stream and resets sensors list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>control roomba at the velocity and the rotational speed (yaw rate)</p>
+<dl class="simple">
+<dt>Note:</dt><dd><p>The Roomba keep a control command until receiving next command</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>Available in modes: Safe or Full</p></li>
+<li><p>Changes mode to: No Change</p></li>
+<li><dl class="simple">
+<dt>Special cases:</dt><dd><ul>
+<li><p>Straight = 32768 or 32767 = hex 8000 or 7FFF</p></li>
+<li><p>Turn in place clockwise = -1</p></li>
+<li><p>Turn in place counter-clockwise = 1</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>velocity</strong> (<em>float</em>) – velocity (m/sec)</p></li>
+<li><p><strong>yaw_rate</strong> (<em>float</em>) – yaw rate (rad/sec)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">math</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">))</span> <span class="c1"># rotate to right side</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="c1"># keep rotate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="c1"># move straight with 10cm/sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_angle">
+<span class="sig-name descname"><span class="pre">request_angle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requests the angular displacement since it was last checked.</p>
+<p>Returns the angle in radians that the Roomba has turned since the angle was last requested.
+Counter-clockwise is defined positive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Output range ± 571.9 rad</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_capacity">
+<span class="sig-name descname"><span class="pre">request_capacity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_capacity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests estimated battery capacity</p>
+<p>Returns the estimated charge capacity of Roomba’s battery in milliamp-hours (mAh).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Capacity in range: 0 – 65535 mAh</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_charge">
+<span class="sig-name descname"><span class="pre">request_charge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests battery charge</p>
+<p>Returns the current charge of Roomba’s battery in milliamp-hours (mAh). The charge value decreases as the
+battery is depleted during running and increases when the battery is charged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Charge in range: 0 – 65535 mAh</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_charging_state">
+<span class="sig-name descname"><span class="pre">request_charging_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_charging_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_charging_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests charging state</p>
+<p>This function returns one of following Roomba’s current charging states:
+0 = Not charging, 
+1 = Reconditioning Charging, 
+2 = Full Charging, 
+3 = Trickle Charging, 
+4 = Waiting, 
+5 = Charging Fault Condition</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>State 0-5</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_current">
+<span class="sig-name descname"><span class="pre">request_current</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_current"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests battery current</p>
+<p>The current in milliamps (mA) flowing into or out of Roomba’s battery. Negative currents indicate that the
+current is flowing out of the battery, as during normal running. Positive currents indicate that the current
+is flowing into the battery, as during charging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Current in range: -32768 – 32767 mA</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_distance">
+<span class="sig-name descname"><span class="pre">request_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requests the Roomba’s total distance traveled since it was last checked.</p>
+<p>Returns distance traveled in millimeters (mm) since the distance was last requested. Average between both
+wheel distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Output range ± 32768 mm</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_encoder_counts">
+<span class="sig-name descname"><span class="pre">request_encoder_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_encoder_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_encoder_counts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requests the raw Roomba encoder counts.</p>
+<p>Returns a tuple containing the following: (left count, right count).
+Linear distance traversed by each wheel is defined by the following:
+distance = (π * 72.0 / 508.8) * count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple of (left count, right count) in range -32767 - 32768</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_oi_mode">
+<span class="sig-name descname"><span class="pre">request_oi_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_oi_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_oi_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests corrent OI mode</p>
+<p>This function returns the current OI mode. Modes see in following table:
+0 = Off, 
+1 = Passive, 
+2 = Safe, 
+3 = Full</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>State 0-3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_temperature">
+<span class="sig-name descname"><span class="pre">request_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">celsius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_temperature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests battery temperature</p>
+<p>This command requests the temperature of Roomba’s battery in degrees Celsius.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>celsius</strong> (<em>bool</em>) – true if celsius, false for fahrenheit</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Temperature in range: -128 – 127 Celsius or converted in Fahrenheit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.request_voltage">
+<span class="sig-name descname"><span class="pre">request_voltage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.request_voltage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.request_voltage" title="Permalink to this definition">¶</a></dt>
+<dd><p>requests battery voltage</p>
+<p>This function returns the current voltage of Roomba’s battery in millivolts (mV).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Voltage in range: 0 – 65535 mV</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_buttons_cmd">
+<span class="sig-name descname"><span class="pre">send_buttons_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_buttons_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_buttons_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>send buttons command</p>
+<p>This command lets you push Roomba’s buttons. The buttons will automatically release after 1/6th of a second.</p>
+<dl class="simple">
+<dt>Note:</dt><dd><ul class="simple">
+<li><p>This API doesn’t work on Roomba 690 Model</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clean</strong> (<em>bool</em>) – clean button on</p></li>
+<li><p><strong>spot</strong> (<em>bool</em>) – spot button on</p></li>
+<li><p><strong>dock</strong> (<em>bool</em>) – dock button on</p></li>
+<li><p><strong>minute</strong> (<em>bool</em>) – minute button on</p></li>
+<li><p><strong>hour</strong> (<em>bool</em>) – hour button on</p></li>
+<li><p><strong>day</strong> (<em>bool</em>) – day button on</p></li>
+<li><p><strong>schedule</strong> (<em>bool</em>) – schedule button on</p></li>
+<li><p><strong>clock</strong> (<em>bool</em>) – clock button on</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_drive_cmd">
+<span class="sig-name descname"><span class="pre">send_drive_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roomba_mm_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roomba_radius_mm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_drive_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_drive_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>send drive command</p>
+<p>This command controls Roomba’s drive wheels.
+The radius is measured from the center of the turning circle to the center of Roomba.
+A Drive command with a positive velocity and a positive radius makes Roomba drive forward while turning left.
+A negative radius makes Roomba turn toward the right.
+Special cases for the radius make Roomba turn in place or drive straight.
+A negative velocity makes Roomba drive backward.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roomba_mm_sec</strong> (<em>float</em>) – the average velocity of the drive wheels in millimeters per second (-500 – 500 mm/s)</p></li>
+<li><p><strong>roomba_radius_mm</strong> (<em>float</em>) – the radius in millimeters at which Roomba will turn. (-2000 – 2000 mm)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_drive_cmd</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># back to the right side</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c1"># keep 2 sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_drive_direct">
+<span class="sig-name descname"><span class="pre">send_drive_direct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">right_mm_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_mm_sec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_drive_direct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_drive_direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>send drive direct command</p>
+<p>This command lets you control the forward and backward motion of Roomba’s drive wheels independently.
+A positive velocity makes that wheel drive forward, while a negative velocity makes it drive backward.</p>
+<ul class="simple">
+<li><p>Available in modes: Safe or Full</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>right_mm_sec</strong> (<em>float</em>) – the velocity of the right drive wheels in millimeters per second (-500 – 500 mm/s)</p></li>
+<li><p><strong>left_mm_sec</strong> (<em>float</em>) – the velocity of the left drive wheels in millimeters per second (-500 – 500 mm/s)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_drive_direct</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="c1"># move right forward</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c1"># keep 2 sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_drive_pwm">
+<span class="sig-name descname"><span class="pre">send_drive_pwm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">right_pwm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_pwm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_drive_pwm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_drive_pwm" title="Permalink to this definition">¶</a></dt>
+<dd><p>send drive pwm command</p>
+<p>This command lets you control the forward and backward motion of Roomba’s drive wheels independently.
+It takes four data bytes, which are interpreted as two 16-bit signed values using two’s complement.
+A positive PWM makes that wheel drive forward, while a negative PWM makes it drive backward.</p>
+<ul class="simple">
+<li><p>Available in modes: Safe or Full</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>right_pwm</strong> (<em>int</em>) – Right wheel PWM (-255 – 255)</p></li>
+<li><p><strong>left_pwm</strong> (<em>int</em>) – Left wheel PWM (-255 - 255)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_drive_pwm</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">)</span> <span class="c1"># move backward</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c1"># keep 2 sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_moters_cmd">
+<span class="sig-name descname"><span class="pre">send_moters_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_brush_on</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_brush_direction_is_ccw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_brush_on</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_brush_direction_is_inward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacuum_on</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_moters_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_moters_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>send moters command</p>
+<p>This command controls the motion of Roomba’s main brush, side brush, and vacuum independently.
+Motor velocity cannot be controlled with this command, all motors will run at maximum speed when enabled.
+The main brush and side brush can be run in either direction. The vacuum only runs forward.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_brush_on</strong> (<em>bool</em>) – main brush on or off</p></li>
+<li><p><strong>main_brush_direction_is_ccw</strong> (<em>bool</em>) – main brush direction, clockwise or counter-clockwise(default)</p></li>
+<li><p><strong>side_brush_on</strong> (<em>bool</em>) – side brush on or off</p></li>
+<li><p><strong>side_brush_direction_is_inward</strong> (<em>bool</em>) – side brush direction, inward(default) or outward</p></li>
+<li><p><strong>side_brush_on</strong> – side brush on or off</p></li>
+<li><p><strong>vacuum_on</strong> (<em>bool</em>) – vacuum on or off</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_moters_cmd</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="c1"># side brush is on, and it rotates inward</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c1"># keep 2 sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_play_cmd">
+<span class="sig-name descname"><span class="pre">send_play_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">song_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_play_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_play_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>send play command</p>
+<p>This command lets you select a song to play from the songs added to Roomba using the Song command.
+You must add one or more songs to Roomba using the Song command in order for the Play command to work.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>song_number</strong> (<em>int</em>) – (0-4)</p>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="s2">&quot;/dev/ttyUSB0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># note names</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f4</span> <span class="o">=</span> <span class="mi">65</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a4</span> <span class="o">=</span> <span class="mi">69</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c5</span> <span class="o">=</span> <span class="mi">72</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># note lengths</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MEASURE</span> <span class="o">=</span> <span class="mi">160</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">HALF</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Ed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">S</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="p">[</span><span class="n">a4</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">f4</span><span class="p">,</span> <span class="n">c5</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">f4</span><span class="p">,</span> <span class="n">c5</span><span class="p">,</span> <span class="n">a4</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="p">[</span><span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Ed</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Ed</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">HALF</span><span class="p">])</span> <span class="c1"># set song</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># play song</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span> <span class="c1"># keep playing</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_pwm_moters">
+<span class="sig-name descname"><span class="pre">send_pwm_moters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_brush_pwm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_brush_pwm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacuum_pwm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_pwm_moters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_pwm_moters" title="Permalink to this definition">¶</a></dt>
+<dd><p>send pwm moters</p>
+<p>This command control the speed of Roomba’s main brush, side brush, and vacuum independently.
+With each data byte, you specify the duty cycle for the low side driver (max 128).
+For example, if you want to control a motor with 25% of battery voltage, choose a duty cycle of 128 * 25% = 32.
+The main brush and side brush can be run in either direction.
+The vacuum only runs forward. Positive speeds turn the motor in its default (cleaning) direction.
+Default direction for the side brush is counterclockwise.
+Default direction for the main brush/flapper is inward.</p>
+<ul class="simple">
+<li><p>Available in modes: Safe or Full</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_brush_pwm</strong> (<em>int</em>) – main brush PWM (-127 - 127)</p></li>
+<li><p><strong>side_brush_pwm</strong> (<em>int</em>) – side brush PWM (-127 - 127)</p></li>
+<li><p><strong>vacuum_pwm</strong> (<em>int</em>) – vacuum duty cycle (0 - 127)</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="s2">&quot;/dev/ttyUSB0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_pwm_moters</span><span class="p">(</span><span class="o">-</span><span class="mi">55</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># main brush is 55% PWM to opposite direction</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c1"># keep 2 sec</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.send_song_cmd">
+<span class="sig-name descname"><span class="pre">send_song_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">song_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">song_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_number_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_duration_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.send_song_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.send_song_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send song command</p>
+<p>This command lets you specify up to four songs to the OI that you can play at a later time.
+Each song is associated with a song number.
+The Play command uses the song number to identify your song selection.
+Each song can contain up to sixteen notes.
+Each note is associated with a note number that uses MIDI note definitions and a duration
+that is specified in fractions of a second.
+The number of data bytes varies, depending on the length of the song specified.
+A one note song is specified by four data bytes.
+For each additional note within a song, add two data bytes.</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>song_number</strong> (<em>int</em>) – (0-4) The song number associated with the specific song.
+If you send a second Song command, using the same song number, the old song is overwritten.</p></li>
+<li><p><strong>song_length</strong> (<em>int</em>) – (1-16) The length of the song, according to the number of musical notes within the song.</p></li>
+<li><p><strong>note_number_list</strong> (<em>list</em>) – Note Number (31 – 127) The pitch of the musical note Roomba will play,
+according to the MIDI note numbering scheme.
+The lowest musical note that Roomba will play is Note #31.
+Roomba considers all musical notes outside the range of 31 – 127 as rest notes,
+and will make no sound during the duration of those notes.</p></li>
+<li><p><strong>note_duration_list</strong> (<em>list</em>) – Note Duration (0 – 255) The duration of a musical note,
+in increments of 1/64th of a second. Example: a half-second long
+musical note has a duration value of 32.</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="s2">&quot;/dev/ttyUSB0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># note names</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f4</span> <span class="o">=</span> <span class="mi">65</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a4</span> <span class="o">=</span> <span class="mi">69</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c5</span> <span class="o">=</span> <span class="mi">72</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># note lengths</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MEASURE</span> <span class="o">=</span> <span class="mi">160</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">HALF</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Ed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">S</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MEASURE</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_song_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="p">[</span><span class="n">a4</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">f4</span><span class="p">,</span> <span class="n">c5</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">f4</span><span class="p">,</span> <span class="n">c5</span><span class="p">,</span> <span class="n">a4</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="p">[</span><span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Ed</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Ed</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">HALF</span><span class="p">])</span> <span class="c1"># set song</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">send_play_cmd</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># play song</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span> <span class="c1"># keep playing</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.start_cleaning">
+<span class="sig-name descname"><span class="pre">start_cleaning</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.start_cleaning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.start_cleaning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the default cleaning</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+<li><p>Changes mode to: Passive</p></li>
+</ul>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_cleaning</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.start_max_cleaning">
+<span class="sig-name descname"><span class="pre">start_max_cleaning</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.start_max_cleaning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.start_max_cleaning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the max cleaning</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+<li><p>Changes mode to: Passive</p></li>
+</ul>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_max_cleaning</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.start_seek_dock">
+<span class="sig-name descname"><span class="pre">start_seek_dock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.start_seek_dock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.start_seek_dock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start seek dock</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+<li><p>Changes mode to: Passive</p></li>
+</ul>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_seek_dock</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.start_spot_cleaning">
+<span class="sig-name descname"><span class="pre">start_spot_cleaning</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.start_spot_cleaning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.start_spot_cleaning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start spot cleaning</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+<li><p>Changes mode to: Passive</p></li>
+</ul>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">start_spot_cleaning</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyroombaadapter.PyRoombaAdapter.turn_off_power">
+<span class="sig-name descname"><span class="pre">turn_off_power</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyroombaadapter.html#PyRoombaAdapter.turn_off_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyroombaadapter.PyRoombaAdapter.turn_off_power" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn off power of Roomba</p>
+<p>The mode change to passive mode.</p>
+<ul class="simple">
+<li><p>Available in modes: Passive, Safe, or Full</p></li>
+</ul>
+<dl>
+<dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adapter</span><span class="o">.</span><span class="n">turn_off_power</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/icon.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">PyRoombaAdapter</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=AtsushiSakai&repo=PyRoombaAdapter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AtsushiSakai/PyRoombaAdapter/">GitHub</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">PyRoombaAdapter</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+<h3 class="donation">Donate/support</h3>
+
+
+
+<p>
+<a class="badge" href="https://www.patreon.com/myenigma">
+<img src="https://img.shields.io/badge/donate-%E2%9D%A4%C2%A0-ff69b4.svg?style=flat" alt="Donate">
+</a>
+</p>
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Atsushi Sakai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/API.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/AtsushiSakai/PyRoombaAdapter" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
