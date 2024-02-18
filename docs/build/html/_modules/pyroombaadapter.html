@@ -1,0 +1,1025 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyroombaadapter &#8212; PyRoombaAdapter 0.2.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyroombaadapter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A Python adapter module for Roomba Open Interface</span>
+
+<span class="sd">This module is based on the document: iRobot® Roomba 500 Open Interface (OI) Specification</span>
+<span class="sd">- Link https://www.irobot.lv/uploaded_files/File/iRobot_Roomba_500_Open_Interface_Spec.pdf</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">import</span> <span class="nn">serial</span>  <span class="c1"># pyserial</span>
+
+
+<div class="viewcode-block" id="PyRoombaAdapter"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter">[docs]</a><span class="k">class</span> <span class="nc">PyRoombaAdapter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adapter class for Roomba Open Interface</span>
+
+<span class="sd">    The constructor connects serial port and change the mode to safe mode</span>
+
+<span class="sd">    :param string port: Serial port path</span>
+
+<span class="sd">    :param int bau_rate: bau rate of serial connection (default=115200)</span>
+
+<span class="sd">    :param float time_out_sec: read time out of serial connection [sec] (default=1.0)</span>
+
+<span class="sd">    :param float wheel_span_mm: wheel span of Roomba [mm]  (default=235.0)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">        &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CMD</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+           <span class="s2">&quot;Baud&quot;</span><span class="p">:</span> <span class="mi">129</span><span class="p">,</span>
+           <span class="s2">&quot;Safe&quot;</span><span class="p">:</span> <span class="mi">131</span><span class="p">,</span>
+           <span class="s2">&quot;Full&quot;</span><span class="p">:</span> <span class="mi">132</span><span class="p">,</span>
+           <span class="s2">&quot;Power&quot;</span><span class="p">:</span> <span class="mi">133</span><span class="p">,</span>
+           <span class="s2">&quot;Spot&quot;</span><span class="p">:</span> <span class="mi">134</span><span class="p">,</span>
+           <span class="s2">&quot;Clean&quot;</span><span class="p">:</span> <span class="mi">135</span><span class="p">,</span>
+           <span class="s2">&quot;Max&quot;</span><span class="p">:</span> <span class="mi">136</span><span class="p">,</span>
+           <span class="s2">&quot;Drive&quot;</span><span class="p">:</span> <span class="mi">137</span><span class="p">,</span>
+           <span class="s2">&quot;Moters&quot;</span><span class="p">:</span> <span class="mi">138</span><span class="p">,</span>
+           <span class="s2">&quot;Song&quot;</span><span class="p">:</span> <span class="mi">140</span><span class="p">,</span>
+           <span class="s2">&quot;Play&quot;</span><span class="p">:</span> <span class="mi">141</span><span class="p">,</span>
+           <span class="s2">&quot;Sensors&quot;</span><span class="p">:</span> <span class="mi">142</span><span class="p">,</span>
+           <span class="s2">&quot;Seek Dock&quot;</span><span class="p">:</span> <span class="mi">143</span><span class="p">,</span>
+           <span class="s2">&quot;PWM Moters&quot;</span><span class="p">:</span> <span class="mi">144</span><span class="p">,</span>
+           <span class="s2">&quot;Drive Direct&quot;</span><span class="p">:</span> <span class="mi">145</span><span class="p">,</span>
+           <span class="s2">&quot;Drive PWM&quot;</span><span class="p">:</span> <span class="mi">146</span><span class="p">,</span>
+           <span class="s2">&quot;Query List&quot;</span><span class="p">:</span> <span class="mi">149</span><span class="p">,</span>
+           <span class="s2">&quot;Stream&quot;</span><span class="p">:</span> <span class="mi">148</span><span class="p">,</span>
+           <span class="s2">&quot;Buttons&quot;</span><span class="p">:</span> <span class="mi">165</span><span class="p">,</span>
+           <span class="p">}</span>
+
+    <span class="n">Packet_ID</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;OI Mode&quot;</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">PARAMS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;STRAIGHT_RADIUS&quot;</span><span class="p">:</span> <span class="mi">32768</span><span class="p">,</span>
+        <span class="s2">&quot;MIN_RADIUS&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2000</span><span class="p">,</span>
+        <span class="s2">&quot;MAX_RADIUS&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="s2">&quot;MIN_VELOCITY&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">500</span><span class="p">,</span>
+        <span class="s2">&quot;MAX_VELOCITY&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">SENSOR</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># &quot;Name&quot;, (Packet ID, Data Bytes, signed)</span>
+        <span class="s2">&quot;Wheel Drops&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Wall&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Left&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Front Left&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Front Right&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Right&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Virtual Wall&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Wheel Overcurrent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Dirt Detect&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;IFR Char Omni&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Buttons&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Distance&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Angle&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Charging State&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Voltage&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Current&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Temperature&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Battery Charge&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Battery Capacity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="c1"># Wall Signal (packet 27) is depreciated</span>
+        <span class="s2">&quot;Cliff Left Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Front Left Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Front Right Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Cliff Right Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Charging Sources Available&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">34</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;OI Mode&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Song Number&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Song Playing&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">37</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Number of Stream Packets&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">38</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Requested Velocity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">39</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Requested Radius&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Requested Right Velocity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Requested Left Velocity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Left Encoder Counts&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">43</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Right Encoder Counts&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">44</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bumper&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Left Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">46</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Front Left Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">47</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Front Center Left Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Front Center Right Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Front Right Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Light Bump Right Signal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">51</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;IFR Char Left&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;IFR Char Right&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="s2">&quot;Left Motor Current&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">54</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Right Motor Current&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Main Brush Motor Current&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">56</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Side Brush Motor Current&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">57</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="s2">&quot;Stasis&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">58</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">bau_rate</span><span class="o">=</span><span class="mi">115200</span><span class="p">,</span> <span class="n">time_out_sec</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">wheel_span_mm</span><span class="o">=</span><span class="mf">235.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WHEEL_SPAN</span> <span class="o">=</span> <span class="n">wheel_span_mm</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect_serial</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">bau_rate</span><span class="p">,</span> <span class="n">time_out_sec</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">serial</span><span class="o">.</span><span class="n">SerialException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find serial port (&#39;</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&#39;). Please reconnect it.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">exc</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">change_mode_to_safe</span><span class="p">()</span>  <span class="c1"># default mode is safe mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.__del__"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.__del__">[docs]</a>    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Destructor of PyRoombaAdapter class</span>
+
+<span class="sd">        The Destructor make Roomba move to passive mode and close serial connection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The `self.serial_con` attribute may not exist if an exception is</span>
+        <span class="c1"># encountered in `__init__()`</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;serial_con&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># disconnect sequence</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>  <span class="c1"># move to passive mode</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.start_cleaning"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.start_cleaning">[docs]</a>    <span class="k">def</span> <span class="nf">start_cleaning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the default cleaning</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        - Changes mode to: Passive</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_cleaning()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Clean&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.start_max_cleaning"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.start_max_cleaning">[docs]</a>    <span class="k">def</span> <span class="nf">start_max_cleaning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the max cleaning</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        - Changes mode to: Passive</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_max_cleaning()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Max&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.start_spot_cleaning"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.start_spot_cleaning">[docs]</a>    <span class="k">def</span> <span class="nf">start_spot_cleaning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start spot cleaning</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        - Changes mode to: Passive</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_spot_cleaning()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Spot&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.start_seek_dock"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.start_seek_dock">[docs]</a>    <span class="k">def</span> <span class="nf">start_seek_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start seek dock</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        - Changes mode to: Passive</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_seek_dock()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Seek Dock&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.change_mode_to_passive"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.change_mode_to_passive">[docs]</a>    <span class="k">def</span> <span class="nf">change_mode_to_passive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change mode to passive mode</span>
+
+<span class="sd">        Roomba beeps once to acknowledge it is starting from “off” mode.</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span></div>
+
+        <span class="c1"># TODO implement</span>
+        <span class="c1"># check mode</span>
+        <span class="c1"># self.request_data([self.Packet_ID[&quot;OI Mode&quot;]])</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.change_mode_to_safe"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.change_mode_to_safe">[docs]</a>    <span class="k">def</span> <span class="nf">change_mode_to_safe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change mode to safe mode</span>
+
+<span class="sd">        Safe mode turns off all LEDs.</span>
+<span class="sd">        If a safety condition occurs, Roomba reverts automatically to Passive mode.</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># send command</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Safe&quot;</span><span class="p">])</span></div>
+
+        <span class="c1"># TODO implement</span>
+        <span class="c1"># check mode</span>
+        <span class="c1"># self.request_data([self.Packet_ID[&quot;OI Mode&quot;]])</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.change_mode_to_full"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.change_mode_to_full">[docs]</a>    <span class="k">def</span> <span class="nf">change_mode_to_full</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change mode to full mode</span>
+
+<span class="sd">        Full mode turns off the cliff, wheel-drop and internal charger safety features.</span>
+<span class="sd">        In Full mode, Roomba executes any command that you send it, even if the internal charger is plugged in,</span>
+<span class="sd">        or command triggers a cliff or wheel drop condition.</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># send command</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Full&quot;</span><span class="p">])</span></div>
+
+        <span class="c1"># TODO implement</span>
+        <span class="c1"># check mode</span>
+        <span class="c1"># self.request_data([self.Packet_ID[&quot;OI Mode&quot;]])</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.turn_off_power"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.turn_off_power">[docs]</a>    <span class="k">def</span> <span class="nf">turn_off_power</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Turn off power of Roomba</span>
+
+<span class="sd">        The mode change to passive mode.</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.turn_off_power()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># send command</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Power&quot;</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">request_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id_list</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">request_id_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># single packet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Sensors&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="n">request_id_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;re:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.move"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.move">[docs]</a>    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">yaw_rate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        control roomba at the velocity and the rotational speed (yaw rate)</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The Roomba keep a control command until receiving next command</span>
+
+<span class="sd">        - Available in modes: Safe or Full</span>
+<span class="sd">        - Changes mode to: No Change</span>
+
+<span class="sd">        - Special cases:</span>
+<span class="sd">            - Straight = 32768 or 32767 = hex 8000 or 7FFF</span>
+<span class="sd">            - Turn in place clockwise = -1</span>
+<span class="sd">            - Turn in place counter-clockwise = 1</span>
+
+<span class="sd">        :param float velocity: velocity (m/sec)</span>
+
+<span class="sd">        :param float yaw_rate: yaw rate (rad/sec)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import math</span>
+<span class="sd">            &gt;&gt;&gt; import time</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.move(0, math.radians(-10)) # rotate to right side</span>
+<span class="sd">            &gt;&gt;&gt; time.sleep(1.0) # keep rotate</span>
+<span class="sd">            &gt;&gt;&gt; adapter.move(0.1, 0.0) # move straight with 10cm/sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">velocity</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># rotation</span>
+            <span class="n">vel_mm_sec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">yaw_rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">WHEEL_SPAN</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">yaw_rate</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">radius_mm</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># default is &#39;CCW&#39; (turning left)</span>
+                <span class="n">radius_mm</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">yaw_rate</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vel_mm_sec</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="mf">1000.0</span>  <span class="c1"># m/s -&gt; mm/s</span>
+            <span class="n">radius_mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;STRAIGHT_RADIUS&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vel_mm_sec</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="mf">1000.0</span>  <span class="c1"># m/s -&gt; mm/s</span>
+            <span class="n">radius_mm</span> <span class="o">=</span> <span class="n">vel_mm_sec</span> <span class="o">/</span> <span class="n">yaw_rate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_drive_cmd</span><span class="p">(</span><span class="n">vel_mm_sec</span><span class="p">,</span> <span class="n">radius_mm</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_drive_cmd"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_drive_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">send_drive_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">roomba_mm_sec</span><span class="p">,</span> <span class="n">roomba_radius_mm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send drive command</span>
+
+<span class="sd">        This command controls Roomba’s drive wheels.</span>
+<span class="sd">        The radius is measured from the center of the turning circle to the center of Roomba.</span>
+<span class="sd">        A Drive command with a positive velocity and a positive radius makes Roomba drive forward while turning left.</span>
+<span class="sd">        A negative radius makes Roomba turn toward the right.</span>
+<span class="sd">        Special cases for the radius make Roomba turn in place or drive straight.</span>
+<span class="sd">        A negative velocity makes Roomba drive backward.</span>
+
+<span class="sd">        :param float roomba_mm_sec: the average velocity of the drive wheels in millimeters per second (-500 – 500 mm/s)</span>
+
+<span class="sd">        :param float roomba_radius_mm: the radius in millimeters at which Roomba will turn. (-2000 – 2000 mm)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_drive_cmd(-100, -1000) # back to the right side</span>
+<span class="sd">            &gt;&gt;&gt; sleep(2.0) # keep 2 sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># print(roomba_mm_sec, roomba_radius_mm, turn_dir)</span>
+
+        <span class="n">roomba_mm_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">roomba_mm_sec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MIN_VELOCITY&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MAX_VELOCITY&quot;</span><span class="p">])</span>
+        <span class="n">velHighVal</span><span class="p">,</span> <span class="n">velLowVal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">roomba_mm_sec</span><span class="p">)</span>
+
+        <span class="n">roomba_radius_mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">roomba_radius_mm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MIN_RADIUS&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MAX_RADIUS&quot;</span><span class="p">])</span>
+        <span class="n">radiusHighVal</span><span class="p">,</span> <span class="n">radiusLowVal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">roomba_radius_mm</span><span class="p">)</span>
+
+        <span class="c1"># send these bytes and set the stored velocities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Drive&quot;</span><span class="p">],</span> <span class="n">velHighVal</span><span class="p">,</span> <span class="n">velLowVal</span><span class="p">,</span> <span class="n">radiusHighVal</span><span class="p">,</span> <span class="n">radiusLowVal</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_drive_direct"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_drive_direct">[docs]</a>    <span class="k">def</span> <span class="nf">send_drive_direct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">right_mm_sec</span><span class="p">,</span> <span class="n">left_mm_sec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send drive direct command</span>
+
+<span class="sd">        This command lets you control the forward and backward motion of Roomba’s drive wheels independently.</span>
+<span class="sd">        A positive velocity makes that wheel drive forward, while a negative velocity makes it drive backward.</span>
+
+<span class="sd">        - Available in modes: Safe or Full</span>
+
+<span class="sd">        :param float right_mm_sec: the velocity of the right drive wheels in millimeters per second (-500 – 500 mm/s)</span>
+
+<span class="sd">        :param float left_mm_sec: the velocity of the left drive wheels in millimeters per second (-500 – 500 mm/s)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_drive_direct(10, 100) # move right forward</span>
+<span class="sd">            &gt;&gt;&gt; sleep(2.0) # keep 2 sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">right_mm_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">right_mm_sec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MIN_VELOCITY&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MAX_VELOCITY&quot;</span><span class="p">])</span>
+        <span class="n">right_high</span><span class="p">,</span> <span class="n">right_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">right_mm_sec</span><span class="p">)</span>
+
+        <span class="n">left_mm_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">left_mm_sec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MIN_VELOCITY&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARAMS</span><span class="p">[</span><span class="s2">&quot;MAX_VELOCITY&quot;</span><span class="p">])</span>
+        <span class="n">left_high</span><span class="p">,</span> <span class="n">left_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">left_mm_sec</span><span class="p">)</span>
+
+        <span class="c1"># send these bytes and set the stored velocities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Drive Direct&quot;</span><span class="p">],</span> <span class="n">right_high</span><span class="p">,</span> <span class="n">right_low</span><span class="p">,</span> <span class="n">left_high</span><span class="p">,</span> <span class="n">left_low</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_drive_pwm"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_drive_pwm">[docs]</a>    <span class="k">def</span> <span class="nf">send_drive_pwm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">right_pwm</span><span class="p">,</span> <span class="n">left_pwm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send drive pwm command</span>
+
+<span class="sd">        This command lets you control the forward and backward motion of Roomba’s drive wheels independently.</span>
+<span class="sd">        It takes four data bytes, which are interpreted as two 16-bit signed values using two’s complement.</span>
+<span class="sd">        A positive PWM makes that wheel drive forward, while a negative PWM makes it drive backward.</span>
+
+<span class="sd">        - Available in modes: Safe or Full</span>
+
+<span class="sd">        :param int right_pwm: Right wheel PWM (-255 – 255)</span>
+
+<span class="sd">        :param int left_pwm: Left wheel PWM (-255 - 255)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_drive_pwm(-200, -200) # move backward</span>
+<span class="sd">            &gt;&gt;&gt; sleep(2.0) # keep 2 sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">right_pwm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">right_pwm</span><span class="p">,</span> <span class="o">-</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="n">right_high</span><span class="p">,</span> <span class="n">right_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">right_pwm</span><span class="p">)</span>
+
+        <span class="n">left_pwm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">left_pwm</span><span class="p">,</span> <span class="o">-</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="n">left_high</span><span class="p">,</span> <span class="n">left_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2_bytes</span><span class="p">(</span><span class="n">left_pwm</span><span class="p">)</span>
+
+        <span class="c1"># send these bytes and set the stored velocities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Drive PWM&quot;</span><span class="p">],</span> <span class="n">right_high</span><span class="p">,</span> <span class="n">right_low</span><span class="p">,</span> <span class="n">left_high</span><span class="p">,</span> <span class="n">left_low</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_moters_cmd"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_moters_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">send_moters_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_brush_on</span><span class="p">,</span> <span class="n">main_brush_direction_is_ccw</span><span class="p">,</span>
+                        <span class="n">side_brush_on</span><span class="p">,</span> <span class="n">side_brush_direction_is_inward</span><span class="p">,</span>
+                        <span class="n">vacuum_on</span>
+                        <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send moters command</span>
+
+<span class="sd">        This command controls the motion of Roomba’s main brush, side brush, and vacuum independently.</span>
+<span class="sd">        Motor velocity cannot be controlled with this command, all motors will run at maximum speed when enabled.</span>
+<span class="sd">        The main brush and side brush can be run in either direction. The vacuum only runs forward.</span>
+
+<span class="sd">        :param bool main_brush_on: main brush on or off</span>
+
+<span class="sd">        :param bool main_brush_direction_is_ccw: main brush direction, clockwise or counter-clockwise(default)</span>
+
+<span class="sd">        :param bool side_brush_on: side brush on or off</span>
+
+<span class="sd">        :param bool side_brush_direction_is_inward: side brush direction, inward(default) or outward</span>
+
+<span class="sd">        :param bool side_brush_on: side brush on or off</span>
+
+<span class="sd">        :param bool vacuum_on: vacuum on or off</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; PORT = &quot;/dev/ttyUSB0&quot;</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(PORT)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_moters_cmd(False, True, True, True, False) # side brush is on, and it rotates inward</span>
+<span class="sd">            &gt;&gt;&gt; sleep(2.0) # keep 2 sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># All initial bit is 0</span>
+        <span class="k">if</span> <span class="n">side_brush_on</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">|=</span> <span class="mb">0b00000001</span>
+        <span class="k">if</span> <span class="n">vacuum_on</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">|=</span> <span class="mb">0b00000010</span>
+        <span class="k">if</span> <span class="n">main_brush_on</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">|=</span> <span class="mb">0b00000100</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">side_brush_direction_is_inward</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">|=</span> <span class="mb">0b00001000</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">main_brush_direction_is_ccw</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">|=</span> <span class="mb">0b00010000</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Moters&quot;</span><span class="p">],</span> <span class="n">cmd</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_pwm_moters"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_pwm_moters">[docs]</a>    <span class="k">def</span> <span class="nf">send_pwm_moters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_brush_pwm</span><span class="p">,</span> <span class="n">side_brush_pwm</span><span class="p">,</span> <span class="n">vacuum_pwm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send pwm moters</span>
+
+<span class="sd">        This command control the speed of Roomba’s main brush, side brush, and vacuum independently.</span>
+<span class="sd">        With each data byte, you specify the duty cycle for the low side driver (max 128).</span>
+<span class="sd">        For example, if you want to control a motor with 25% of battery voltage, choose a duty cycle of 128 * 25% = 32.</span>
+<span class="sd">        The main brush and side brush can be run in either direction.</span>
+<span class="sd">        The vacuum only runs forward. Positive speeds turn the motor in its default (cleaning) direction.</span>
+<span class="sd">        Default direction for the side brush is counterclockwise.</span>
+<span class="sd">        Default direction for the main brush/flapper is inward.</span>
+
+<span class="sd">        - Available in modes: Safe or Full</span>
+
+<span class="sd">        :param int main_brush_pwm: main brush PWM (-127 - 127)</span>
+
+<span class="sd">        :param int side_brush_pwm: side brush PWM (-127 - 127)</span>
+
+<span class="sd">        :param int vacuum_pwm: vacuum duty cycle (0 - 127)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(&quot;/dev/ttyUSB0&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_pwm_moters(-55, 0, 0) # main brush is 55% PWM to opposite direction</span>
+<span class="sd">            &gt;&gt;&gt; sleep(2.0) # keep 2 sec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">main_brush_pwm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_1_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">main_brush_pwm</span><span class="p">,</span> <span class="o">-</span><span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span>
+        <span class="n">side_brush_pwm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_1_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">side_brush_pwm</span><span class="p">,</span> <span class="o">-</span><span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span>
+        <span class="n">vacuum_pwm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_min_max</span><span class="p">(</span><span class="n">vacuum_pwm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;PWM Moters&quot;</span><span class="p">],</span> <span class="n">main_brush_pwm</span><span class="p">,</span> <span class="n">side_brush_pwm</span><span class="p">,</span> <span class="n">vacuum_pwm</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_buttons_cmd"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_buttons_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">send_buttons_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">spot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">minute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">schedule</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send buttons command</span>
+
+<span class="sd">        This command lets you push Roomba’s buttons. The buttons will automatically release after 1/6th of a second.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            - This API doesn&#39;t work on Roomba 690 Model</span>
+
+<span class="sd">        :param bool clean: clean button on</span>
+<span class="sd">        :param bool spot: spot button on</span>
+<span class="sd">        :param bool dock: dock button on</span>
+<span class="sd">        :param bool minute: minute button on</span>
+<span class="sd">        :param bool hour: hour button on</span>
+<span class="sd">        :param bool day: day button on</span>
+<span class="sd">        :param bool schedule: schedule button on</span>
+<span class="sd">        :param bool clock: clock button on</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buttons</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># All initial bit is 0</span>
+        <span class="k">if</span> <span class="n">clean</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00000001</span>
+        <span class="k">if</span> <span class="n">spot</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00000010</span>
+        <span class="k">if</span> <span class="n">dock</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00000100</span>
+        <span class="k">if</span> <span class="n">minute</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00001000</span>
+        <span class="k">if</span> <span class="n">hour</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00010000</span>
+        <span class="k">if</span> <span class="n">day</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b00100000</span>
+        <span class="k">if</span> <span class="n">schedule</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b01000000</span>
+        <span class="k">if</span> <span class="n">clock</span><span class="p">:</span>
+            <span class="n">buttons</span> <span class="o">|=</span> <span class="mb">0b10000000</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Buttons&quot;</span><span class="p">],</span> <span class="n">buttons</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_song_cmd"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_song_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">send_song_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">song_number</span><span class="p">,</span> <span class="n">song_length</span><span class="p">,</span> <span class="n">note_number_list</span><span class="p">,</span> <span class="n">note_duration_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send song command</span>
+
+<span class="sd">        This command lets you specify up to four songs to the OI that you can play at a later time.</span>
+<span class="sd">        Each song is associated with a song number.</span>
+<span class="sd">        The Play command uses the song number to identify your song selection.</span>
+<span class="sd">        Each song can contain up to sixteen notes.</span>
+<span class="sd">        Each note is associated with a note number that uses MIDI note definitions and a duration</span>
+<span class="sd">        that is specified in fractions of a second.</span>
+<span class="sd">        The number of data bytes varies, depending on the length of the song specified.</span>
+<span class="sd">        A one note song is specified by four data bytes.</span>
+<span class="sd">        For each additional note within a song, add two data bytes.</span>
+
+<span class="sd">        - Available in modes: Passive, Safe, or Full</span>
+
+<span class="sd">        :param int song_number: (0-4) The song number associated with the specific song.</span>
+<span class="sd">                        If you send a second Song command, using the same song number, the old song is overwritten.</span>
+
+<span class="sd">        :param int song_length: (1-16) The length of the song, according to the number of musical notes within the song.</span>
+
+<span class="sd">        :param list note_number_list: Note Number (31 – 127) The pitch of the musical note Roomba will play,</span>
+<span class="sd">                                      according to the MIDI note numbering scheme.</span>
+<span class="sd">                                      The lowest musical note that Roomba will play is Note #31.</span>
+<span class="sd">                                      Roomba considers all musical notes outside the range of 31 – 127 as rest notes,</span>
+<span class="sd">                                      and will make no sound during the duration of those notes.</span>
+
+<span class="sd">        :param list note_duration_list: Note Duration (0 – 255) The duration of a musical note,</span>
+<span class="sd">                                        in increments of 1/64th of a second. Example: a half-second long</span>
+<span class="sd">                                        musical note has a duration value of 32.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(&quot;/dev/ttyUSB0&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; # note names</span>
+<span class="sd">            &gt;&gt;&gt; f4 = 65</span>
+<span class="sd">            &gt;&gt;&gt; a4 = 69</span>
+<span class="sd">            &gt;&gt;&gt; c5 = 72</span>
+<span class="sd">            &gt;&gt;&gt; # note lengths</span>
+<span class="sd">            &gt;&gt;&gt; MEASURE = 160</span>
+<span class="sd">            &gt;&gt;&gt; HALF = int(MEASURE / 2)</span>
+<span class="sd">            &gt;&gt;&gt; Q = int(MEASURE / 4)</span>
+<span class="sd">            &gt;&gt;&gt; Ed = int(MEASURE * 3 / 16)</span>
+<span class="sd">            &gt;&gt;&gt; S = int(MEASURE / 16)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_song_cmd(0, 9,</span>
+<span class="sd">            &gt;&gt;&gt;             [a4, a4, a4, f4, c5, a4, f4, c5, a4],</span>
+<span class="sd">            &gt;&gt;&gt;             [Q, Q, Q, Ed, S, Q, Ed, S, HALF]) # set song</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_play_cmd(0) # play song</span>
+<span class="sd">            &gt;&gt;&gt; sleep(10.0) # keep playing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Song&quot;</span><span class="p">],</span> <span class="n">song_number</span><span class="p">,</span> <span class="n">song_length</span><span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">note_number</span><span class="p">,</span> <span class="n">note_duration</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">note_number_list</span><span class="p">,</span> <span class="n">note_duration_list</span><span class="p">):</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note_number</span><span class="p">)</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note_duration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.send_play_cmd"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.send_play_cmd">[docs]</a>    <span class="k">def</span> <span class="nf">send_play_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">song_number</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        send play command</span>
+
+<span class="sd">        This command lets you select a song to play from the songs added to Roomba using the Song command.</span>
+<span class="sd">        You must add one or more songs to Roomba using the Song command in order for the Play command to work.</span>
+
+<span class="sd">        :param int song_number: (0-4)</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(&quot;/dev/ttyUSB0&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; # note names</span>
+<span class="sd">            &gt;&gt;&gt; f4 = 65</span>
+<span class="sd">            &gt;&gt;&gt; a4 = 69</span>
+<span class="sd">            &gt;&gt;&gt; c5 = 72</span>
+<span class="sd">            &gt;&gt;&gt; # note lengths</span>
+<span class="sd">            &gt;&gt;&gt; MEASURE = 160</span>
+<span class="sd">            &gt;&gt;&gt; HALF = int(MEASURE / 2)</span>
+<span class="sd">            &gt;&gt;&gt; Q = int(MEASURE / 4)</span>
+<span class="sd">            &gt;&gt;&gt; Ed = int(MEASURE * 3 / 16)</span>
+<span class="sd">            &gt;&gt;&gt; S = int(MEASURE / 16)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_song_cmd(0, 9,</span>
+<span class="sd">            &gt;&gt;&gt;             [a4, a4, a4, f4, c5, a4, f4, c5, a4],</span>
+<span class="sd">            &gt;&gt;&gt;             [Q, Q, Q, Ed, S, Q, Ed, S, HALF]) # set song</span>
+<span class="sd">            &gt;&gt;&gt; adapter.send_play_cmd(0) # play song</span>
+<span class="sd">            &gt;&gt;&gt; sleep(10.0) # keep playing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Play&quot;</span><span class="p">],</span> <span class="n">song_number</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">_request_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests sensor value from Roomba and returns interpreted value.</span>
+<span class="sd">        :param sensor: Sensor name from SENSOR dictionary</span>
+<span class="sd">        :return: int sensor value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Sensors&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_charging_state"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_charging_state">[docs]</a>    <span class="k">def</span> <span class="nf">request_charging_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests charging state</span>
+
+<span class="sd">        This function returns one of following Roomba’s current charging states:</span>
+<span class="sd">        0 = Not charging, </span>
+<span class="sd">        1 = Reconditioning Charging, </span>
+<span class="sd">        2 = Full Charging, </span>
+<span class="sd">        3 = Trickle Charging, </span>
+<span class="sd">        4 = Waiting, </span>
+<span class="sd">        5 = Charging Fault Condition</span>
+
+<span class="sd">        :return: State 0-5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Charging State&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_voltage"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_voltage">[docs]</a>    <span class="k">def</span> <span class="nf">request_voltage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests battery voltage</span>
+
+<span class="sd">        This function returns the current voltage of Roomba’s battery in millivolts (mV).</span>
+
+<span class="sd">        :return: Voltage in range: 0 – 65535 mV</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Voltage&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_current"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_current">[docs]</a>    <span class="k">def</span> <span class="nf">request_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests battery current</span>
+
+<span class="sd">        The current in milliamps (mA) flowing into or out of Roomba’s battery. Negative currents indicate that the</span>
+<span class="sd">        current is flowing out of the battery, as during normal running. Positive currents indicate that the current</span>
+<span class="sd">        is flowing into the battery, as during charging.</span>
+
+<span class="sd">        :return: Current in range: -32768 – 32767 mA</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Current&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_temperature"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_temperature">[docs]</a>    <span class="k">def</span> <span class="nf">request_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">celsius</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests battery temperature</span>
+
+<span class="sd">        This command requests the temperature of Roomba’s battery in degrees Celsius.</span>
+
+<span class="sd">        :param bool celsius: true if celsius, false for fahrenheit</span>
+
+<span class="sd">        :return: Temperature in range: -128 – 127 Celsius or converted in Fahrenheit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">celsius</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp</span> <span class="o">*</span> <span class="mf">1.8</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span>
+        <span class="k">return</span> <span class="n">temp</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_charge"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_charge">[docs]</a>    <span class="k">def</span> <span class="nf">request_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests battery charge</span>
+
+<span class="sd">        Returns the current charge of Roomba’s battery in milliamp-hours (mAh). The charge value decreases as the</span>
+<span class="sd">        battery is depleted during running and increases when the battery is charged.</span>
+
+<span class="sd">        :return: Charge in range: 0 – 65535 mAh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Battery Charge&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_capacity"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">request_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests estimated battery capacity</span>
+
+<span class="sd">        Returns the estimated charge capacity of Roomba’s battery in milliamp-hours (mAh).</span>
+
+<span class="sd">        :return: Capacity in range: 0 – 65535 mAh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Battery Capacity&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_distance"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_distance">[docs]</a>    <span class="k">def</span> <span class="nf">request_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests the Roomba&#39;s total distance traveled since it was last checked.</span>
+
+<span class="sd">        Returns distance traveled in millimeters (mm) since the distance was last requested. Average between both</span>
+<span class="sd">        wheel distances.</span>
+
+<span class="sd">        :return: Output range ± 32768 mm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Distance&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_angle"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_angle">[docs]</a>    <span class="k">def</span> <span class="nf">request_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests the angular displacement since it was last checked.</span>
+
+<span class="sd">        Returns the angle in radians that the Roomba has turned since the angle was last requested.</span>
+<span class="sd">        Counter-clockwise is defined positive.</span>
+
+<span class="sd">        :return: Output range ± 571.9 rad</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Return a value in radians to remain consistent with the rest of the library</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Angle&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.request_encoder_counts"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_encoder_counts">[docs]</a>    <span class="k">def</span> <span class="nf">request_encoder_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Requests the raw Roomba encoder counts.</span>
+
+<span class="sd">        Returns a tuple containing the following: (left count, right count).</span>
+<span class="sd">        Linear distance traversed by each wheel is defined by the following:</span>
+<span class="sd">        distance = (π * 72.0 / 508.8) * count.</span>
+
+<span class="sd">        :return: A tuple of (left count, right count) in range -32767 - 32768</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Left Encoder Counts&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;Right Encoder Counts&quot;</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="PyRoombaAdapter.request_oi_mode"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.request_oi_mode">[docs]</a>    <span class="k">def</span> <span class="nf">request_oi_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        requests corrent OI mode</span>
+
+<span class="sd">        This function returns the current OI mode. Modes see in following table:</span>
+<span class="sd">        0 = Off, </span>
+<span class="sd">        1 = Passive, </span>
+<span class="sd">        2 = Safe, </span>
+<span class="sd">        3 = Full</span>
+
+<span class="sd">        :return: State 0-3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request_sensor</span><span class="p">(</span><span class="s2">&quot;OI Mode&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.data_stream_start"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.data_stream_start">[docs]</a>    <span class="k">def</span> <span class="nf">data_stream_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensors_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        starts data stream</span>
+
+<span class="sd">        This function issues command which starts a stream of data packets. The provided list of packets is sent</span>
+<span class="sd">        every 15 ms, which is the rate Roomba uses to update data.</span>
+
+<span class="sd">        :param list sensors_list: One or more from following sensors: [&quot;Charging State&quot;, &quot;Voltage&quot;, &quot;Current&quot;, &quot;Temperature&quot;, &quot;Battery Charge&quot;,</span>
+<span class="sd">                                   &quot;Battery Capacity&quot;, &quot;OI Mode&quot;]</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(&quot;/dev/ttyUSB0&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_data_stream([&quot;Charging State&quot;, &quot;Voltage&quot;, &quot;Temperature&quot;])</span>
+<span class="sd">            &gt;&gt;&gt; print(adapter.read_data_stream()) # list with values</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">sensors_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">2</span><span class="p">])})</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SENSOR</span><span class="p">[</span><span class="n">sensor</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Stream&quot;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">stream</span><span class="p">)]</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.data_stream_stop"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.data_stream_stop">[docs]</a>    <span class="k">def</span> <span class="nf">data_stream_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        stops data stream</span>
+
+<span class="sd">        Stops data stream and resets sensors list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_send_cmd</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">CMD</span><span class="p">[</span><span class="s2">&quot;Stream&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="PyRoombaAdapter.data_stream_read"><a class="viewcode-back" href="../API.html#pyroombaadapter.PyRoombaAdapter.data_stream_read">[docs]</a>    <span class="k">def</span> <span class="nf">data_stream_read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reads data stream</span>
+
+<span class="sd">        Reads stream of sensor data packets from Roomba.</span>
+
+<span class="sd">        :return: list with sensors values or empty list on error</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; adapter = PyRoombaAdapter(&quot;/dev/ttyUSB0&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; adapter.start_data_stream([&quot;Charging State&quot;, &quot;Voltage&quot;, &quot;Temperature&quot;])</span>
+<span class="sd">            &gt;&gt;&gt; print(adapter.read_data_stream()) # [0, 15530, 20]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">header_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">header_magic</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x13</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="n">data_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data_len</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">))</span>
+            <span class="n">checksum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">calculated_checksum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">header_magic</span> <span class="o">+</span> <span class="n">data_len</span> <span class="o">+</span> <span class="n">data</span> <span class="o">+</span> <span class="n">checksum</span><span class="p">))</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">calculated_checksum</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">data_pos</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">data_pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                    <span class="n">packet_id</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">data_pos</span><span class="p">:</span><span class="n">data_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span>
+                    <span class="n">data_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="n">packet_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span><span class="p">[</span><span class="n">packet_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">packet_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data_pos</span><span class="p">:</span><span class="n">data_pos</span> <span class="o">+</span> <span class="n">packet_size</span><span class="p">]</span>
+                    <span class="n">data_pos</span> <span class="o">+=</span> <span class="n">packet_size</span>
+
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">packet_data</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stream_sensors</span><span class="p">[</span><span class="n">packet_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_connect_serial</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">bau_rate</span><span class="p">,</span> <span class="n">time_out</span><span class="p">):</span>
+        <span class="n">serial_con</span> <span class="o">=</span> <span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">baudrate</span><span class="o">=</span><span class="n">bau_rate</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">time_out</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">serial_con</span><span class="o">.</span><span class="n">isOpen</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Serial port is open, presumably to a roomba...&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Serial port did NOT open&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">serial_con</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_adjust_min_max</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">):</span>
+
+        <span class="c1"># integer cast</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="n">min_val</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">min_val</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">&gt;</span> <span class="n">max_val</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">max_val</span>
+
+        <span class="k">return</span> <span class="n">val</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_2_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; returns two bytes (ints) in high, low order</span>
+<span class="sd">        whose bits form the input value when interpreted in</span>
+<span class="sd">        two&#39;s complement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if positive or zero, it&#39;s OK</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eqBitVal</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># if it&#39;s negative, I think it is this</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eqBitVal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">eqBitVal</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="n">eqBitVal</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_1_bytes</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; returns one bytes (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># if positive or zero, it&#39;s OK</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eqBitVal</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># if it&#39;s negative, I think it is this</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eqBitVal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">eqBitVal</span> <span class="o">&amp;</span> <span class="mh">0xFF</span>
+
+    <span class="k">def</span> <span class="nf">_send_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># command list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">cmd</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># one command</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serial_con</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">([</span><span class="n">cmd</span><span class="p">]))</span></div>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;/dev/ttyUSB0&quot;</span>
+    <span class="n">adapter</span> <span class="o">=</span> <span class="n">PyRoombaAdapter</span><span class="p">(</span><span class="n">PORT</span><span class="p">)</span>
+    <span class="c1"># adapter.send_drive_cmd(-100, -1000)</span>
+    <span class="c1"># adapter.send_drive_direct(-100, 100)</span>
+    <span class="kn">import</span> <span class="nn">math</span>
+    <span class="c1"># adapter.move(0.1, math.radians(-10))</span>
+    <span class="c1"># adapter.send_drive_pwm(80, 80)</span>
+    <span class="c1"># adapter.send_drive_pwm(-200, -200)</span>
+    <span class="c1"># adapter.send_moters_cmd(False, True, True, True, False)</span>
+    <span class="c1"># adapter.send_pwm_moters(-55, -25, 25)</span>
+    <span class="c1"># adapter.send_buttons_cmd(dock=True)</span>
+    <span class="c1"># sleep(1.0)</span>
+
+    <span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+    <span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+
+    <span class="c1"># adapter.move(-0.1, 0)</span>
+    <span class="c1"># sleep(1.0)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/icon.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">PyRoombaAdapter</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=AtsushiSakai&repo=PyRoombaAdapter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">API</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AtsushiSakai/PyRoombaAdapter/">GitHub</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+<h3 class="donation">Donate/support</h3>
+
+
+
+<p>
+<a class="badge" href="https://www.patreon.com/myenigma">
+<img src="https://img.shields.io/badge/donate-%E2%9D%A4%C2%A0-ff69b4.svg?style=flat" alt="Donate">
+</a>
+</p>
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Atsushi Sakai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/AtsushiSakai/PyRoombaAdapter" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
