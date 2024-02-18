@@ -722,7 +722,7 @@ class PyRoombaAdapter:
         Linear distance traversed by each wheel is defined by the following:
         distance = (π * 72.0 / 508.8) * count.
 
-        :return: Output range -32767 - 32768
+        :return: A tuple of (left count, right count) in range -32767 - 32768
         """
         return (self._request_sensor("Left Encoder Counts"), self._request_sensor("Right Encoder Counts"))
     
