@@ -101,6 +101,9 @@ API</a></p></li>
 <span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">adapter</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>  <span class="c1"># turn left</span>
 <span class="n">sleep</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span>
+
+<span class="c1">#Print the total distance traveled</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;distance: </span><span class="si">{</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_distance</span><span class="p">()</span><span class="si">}</span><span class="s2"> mm, angle: </span><span class="si">{</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_angle</span><span class="p">()</span><span class="si">}</span><span class="s2"> rad&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -208,6 +211,8 @@ demand:</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_charge</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_capacity</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_oi_mode</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_distance</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">request_angle</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>Start a data stream:</p>
